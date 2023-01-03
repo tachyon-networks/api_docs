@@ -1,0 +1,274 @@
+openapi: '3.0.2'
+info:
+  title: Tachyon Networks Public API v1.1.0
+  version: '1.1.0'
+  description: Use this API to access information and configure your Tachyon Networks TNA-30x devices.  This version applies to devices running firmware 1.11.0. Additional examples of statistics output can be found on the Wiki.
+servers:
+  - url: http://{deviceMgmtIp}/cgi.lua/apiv1
+    variables:
+      deviceMgmtIp:
+        default: 192.168.2.1
+        description: Device's management IP address
+security:
+  - cookieAuth: []
+paths:
+  /login:
+    post:
+      description: Post login credentials to your device in order to authenticate your client.
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: 
+                  description: User's username
+                  type: string
+                  example: root
+                password:
+                  description: User's password
+                  type: string
+                  example: admin
+      responses: 
+        200:
+          description: Successful login response containing api token.  (Token added to response for firmwares v1.10.4+)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  token:  
+                    type: string
+                    example: BCIHXGDDAAAAAAGVLFXNDYXRCCCJKGQFFA2F7BW2VPPN6===
+                    description: API token that will need to be included in subsequent API requests.
+                  level: 
+                    type: integer
+                    example: 0
+                    enum: [0,9]
+                    description: User access level.  0 = Admin, 9 = Read-only.
+                  auth: 
+                    type: boolean
+                    example: true
+                    description: Authorization status.
+        401:
+          description: Failed login response. 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericUnauthReponse'
+
+    delete:    
+      description: Logout of your API session.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API token representing the session you wish to delete.
+          required: true
+      responses:
+        200: 
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+  /update:
+    get:
+      description: Get the current firmware task status details, if they exist.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+      responses:
+        200:
+          description: Response object containing details about the current firmware upgrade task. An empty object will be returned if no task exists. Visit the Tachyon Support site for more examples.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    description: Status of the current firmware update task. 
+                    type: string
+                    enum: [FAIL, SUCCESS, IN_PROGRESS]
+                    example: FAIL
+                  state:
+                    description: Current state of the firmware update task. 
+                    type: string
+                    enum: [FIMRWARE_DOWNLOAD, FIRMWARE_FLASHING]
+                    example: FIMRWARE_DOWNLOAD
+                  last_changed:
+                    description: Timestamp of the last change to the firmware update task.
+                    type: integer
+                    example: 1621635010
+                  error: 
+                    description: Optional detailed error message in the case of the FAIL status.
+                    type: string
+                    example: "Unable to download file: curl(6) - Couldn't resolve host 'bad-firmware-url.com'"
+                  comment:
+                    description: Optional non-error comment/message regarding the task's current status.  This field is only populated after flashing is complete.
+                    type: string
+                    example: Reboot device for the new firmware to become active.
+                  URL: 
+                    description: Optional URL of the firmware provided by the user. Included for FIRMWARE_DOWNLOAD states.
+                    type: string
+                    example: https://bad-firmware.url
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericUnauthReponse'
+    put:
+      description: Instruct the device to asynchronously download a firmware file from the specified URL. 
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              required: [firmware_url]
+              type: object
+              properties:
+                firmware_url: 
+                  description: URL of firmware file.
+                  type: string
+                  example: https://tachyon-networks.com/firmware/tna-30x-1.11.0-upgrade-squashfs.bin
+      responses:
+        200: 
+          description: Success response returned after performing basic validation on the parameters. Use the GET /update route to fetch the actual download status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericUnauthReponse'
+        400:
+          description: Failure response when missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Description of the error.
+                    type: string
+                    example: Missing Firmware URL.
+    post:   
+      description: Instruct the device to begin flashing the previously-downloaded firmware to the alternate bootbank. 
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+      responses:
+        200: 
+          description: Success response will be returned if firmware was successfully downloaded and validated, and flashing has begun.  Use the GET /update route to check on the status of the flashing process.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericUnauthReponse'
+
+  /stats:
+    get:
+      description: Fetch system, wireless, ethernet, and/or network statistics from the device.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+        - in: query
+          name: type
+          schema:
+            type: string
+            example: system,wireless
+      
+      responses: 
+        200:
+          description: JSON object containing the requested stats. See the support site for additional examples.
+          
+  /speedtest:
+    get:
+      description: Get the last results of a speedtest initiated via the POST /speedtest route. 
+    post:
+      description: Beging a speedtest. Peer MAC is only required when performing a speedtest on a device in Access Point mode.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+        - in: query
+          name: type
+          schema:
+            type: string
+            example: system,wireless
+      
+      responses: 
+        200: 
+          description: Success response when starting a speedtest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'               
+components:
+  securitySchemes:
+    cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
+      type: apiKey
+      in: cookie
+      name: api_token
+  schemas:
+    GenericSuccessReponse:
+      type: object
+      properties:
+        status:
+          description: Status of the response. 
+          type: string
+          example: ok
+    GenericUnauthReponse:
+      type: object
+      properties: 
+        statusCode: 
+          description: Error status code matching HTTP status code.
+          type: integer
+          example: 401
+        description:
+          description: Short description of the error.
+          example: Unauthorized
+          type: string
+        error: 
+          type: object
+          properties:
+            detail:
+              description: Detailed error message.
+              type: string
+              example: Authorization Failed
+            path:
+              type: string
+              description: Route where this error occurred.
+              example: /cgi.lua/apiv1/stats
+
+      
