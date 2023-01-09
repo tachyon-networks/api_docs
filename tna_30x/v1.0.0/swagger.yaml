@@ -102,7 +102,7 @@ paths:
           required: true
       responses:
         200:
-          description: Response object containing details about the current firmware upgrade task. An empty object will be returned if no task exists. Visit the Tachyon Support site for more examples.
+          description: Response object containing details about the current firmware upgrade task. An empty object will be returned if no task exists.
           content:
             application/json:
               schema:
@@ -431,12 +431,24 @@ paths:
                     description: General status of the speedtest.
                   error: 
                     type: string
-                    example: "speedtest: already running, aborted | Invalid peer ... | Remote peer does not respond"
+                    example: "speedtest: already running, aborted"
                     description: Description of the error, if status is set to 'error'
                   mbps: 
                     type: number
                     example: 2186.33056640625
                     description: The speed in mbps achieved during this speedtest. This will be missing if the speedtest could not be run. 
+              examples:
+                valid-test: 
+                  value:
+                    {"last_changed":1673316582,"peer_mac":"78:5E:E8:D0:10:22","reverse":false,"status":"ok","mbps":2714.90576171875}
+                valid-no-results:
+                  value: {}
+                error-no-response:
+                  value: {"last_changed":1673316706,"peer_mac":"78:5E:E8:D0:10:23","reverse":false,"status":"error","error":"Remote peer does not respond"}
+                error-already-running: 
+                  value: {"last_changed":1673316639,"peer_mac":"78:5E:E8:D0:10:22","reverse":false,"status":"error","error":"speedtest: already running, aborted."}
+                error-invalid-peer:
+                  value: {"last_changed":1673316673,"peer_mac":"blahblah","reverse":false,"status":"error","error":"Invalid peer 78 (detected 2 peer(s))"}
         401:
           description: Unauthorized response.
           content:
@@ -559,10 +571,10 @@ paths:
                 }
   /config:
     get:
-      description: Get the device's current configuration.  
+      description: Get the device's current configuration.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
       responses:
         200:
-          description: JSON object containing the device's current configuration.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+          description: JSON object containing the device's current configuration.  
           content:
             application/json:
               schema:
@@ -615,7 +627,7 @@ paths:
                   description: The JSON object representing this device's configuration. Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
                   type: object
                   example: {"system":{"device_name":"Tachyon Networks PtMP","reset_button":{"enabled":true},"hostname":"tachyon-ptmp-ap","users":[{"username":"root","type":"admin","password_hash":"$1$6Hzch.yD$ULugJ982Yb1D0g8zhqv3T.","enabled":true},{"username":"guest","type":"read-only","password_hash":"$1$/DpVqAVi$ZwWGYO83CGVclJeuwBb5C0","enabled":true},{"username":"new","type":"admin","password_hash":"$1$mokR7kX6$CvqYTxcq450LVAUjRHVM51","enabled":true},{"username":"guest1","type":"read-only","password_hash":"$1$ohSsj1Ga$xF6ruORwRp1TNYmUjRgQn0","enabled":true}],"device_location":"A/V Closet","timezone":"America/Los_Angeles"},"wireless":{"radios":{"wlan0":{"channel_width":2160,"ssid":"tachyon-ptmp","channel":6,"max_mcs":12,"mode":"ap","passphrase":"passphrase","security":"wpapsk"}}},"network":{"wan":{"ipv6":{"enabled":false},"data_vlan":{"enabled":false},"ipv4":{"enabled":true,"prefix":24,"custom_dns":true,"dns_servers":["1.1.1.1","1.0.0.1"],"ipaddr":"192.168.1.1","dhcp_broadcast":false},"mgmt_vlan":{"enabled":false},"ip_mode":"dhcp"},"traffic_control":{"limit_download":{"enabled":false},"limit_upload":{"enabled":false}},"poe_out_enabled":false,"general":{"ageing_time":300,"mtu":1501}},"services":{"snmp":{"v2":{"enabled":true,"community":"public"},"v3":{"enabled":false}},"ping_watchdog":{"enabled":false},"http":{"https_port":443,"port":80},"remote_syslog":{"enabled":false},"snmp_traps":{"enabled":false},"discovery":{"enabled":true,"broadcast_protocols":{"lldp":true,"cdp":true,"mndp":true},"lldp_server":{"enabled":true}},"ntp":{"enabled":true,"servers":["time.google.com","time.cloudflare.com"]}}}
-      description: Update the device's configuration and restart networking services, or perform a dry run. 
+      description: Update the device's configuration and restart networking services, or perform a dry run.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
       responses:
         200:
           description: JSON object containing the information related to a successful configuration update operation.
