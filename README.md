@@ -8,8 +8,8 @@ You can find usage of examples on the <a href="https://tachyon-networks.freshdes
 
 
 ## Latest version: v1.0.1
-View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/">API (Swagger) docs here.</a>
-View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/keys.html">Supported configuration here.</a>
+* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/">API (Swagger) docs here.</a>
+* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/keys.html">Supported configuration here.</a>
 
 This applies to devices running firmwares v1.11.1 and later, unless otherwise noted.
 
@@ -18,9 +18,8 @@ This applies to devices running firmwares v1.11.1 and later, unless otherwise no
 ## Previous versions
 
 ### Version v1.0.0 
-
-View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/">API (Swagger) docs here.</a>
-View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/keys.html">Supported configuration here.</a>
+* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/">API (Swagger) docs here.</a>
+* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/keys.html">Supported configuration here.</a>
 
 This applies to devices running firmwares v1.11.0 and later, unless otherwise noted.
 
