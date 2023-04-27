@@ -1,8 +1,8 @@
 openapi: '3.0.2'
 info:
-  title: Tachyon Networks Public API v1.0.0
-  version: '1.0.0'
-  description: Use this API to access information and configure your Tachyon Networks TNA-30x devices.  This version applies to devices running firmware 1.11.0 and later unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api" target="_new">here</a>.
+  title: Tachyon Networks Public API v1.0.1
+  version: '1.0.1'
+  description: Use this API to access information and configure your Tachyon Networks TNA-30x devices. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api" target="_new">here</a>.
 servers:
   - url: http://{deviceMgmtIp}/cgi.lua/apiv1
     variables:
@@ -135,12 +135,25 @@ paths:
                     type: string
                     example: https://bad-firmware.url
               examples:
-                no-task: {}
-                success:
-                bad-url:
+                no-task: 
+                  value: 
+                    {}
+                bad-url: 
+                  value: 
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                download-success: 
+                  value: 
+                    {"status":"SUCCESS","url":"https://tachyon-networks.com/fw/tna-30x-1.11.1-r53981-20230426-tn-110-prs-squashfs-sysupgrade.bin","state":"FIRMWARE_DOWNLOAD","last_changed":1682628473}
+                download-failure: 
+                  value: 
+                    {"state":"FIRMWARE_DOWNLOAD","last_changed":1682628379,"status":"FAIL","url":"https://badurl.com","error":"Unable to download file: curl: (28) Failed to connect to badurl.com port 443: Operation timed out\n"}
+                flashing-in-progress:
+                  value:
+                    {"status":"IN_PROGRESS","last_changed":1682628956,"state":"FIRMWARE_FLASHING"}
+                flashing-complete:
+                  value:
+                    {"status":"COMPLETE","last_changed":1682628969,"comment":"Reboot device for the new firmware to become active.","state":"FIRMWARE_FLASHING"}
 
-                download-success:
-                download-failure:
 
         400:
           description: Failure response for an invalid request, such as missing one or more parameters.

@@ -135,12 +135,26 @@ paths:
                     type: string
                     example: https://bad-firmware.url
               examples:
-                no-task: {}
-                success:
-                bad-url:
-
-                download-success:
-                download-failure:
+                no-task: 
+                  value: 
+                    {}
+                bad-url: 
+                  value: 
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                download-success: 
+                  value: 
+                    {"status":"SUCCESS","url":"https://tachyon-networks.com/fw/tna-30x-1.11.1-r53981-20230426-tn-110-prs-squashfs-sysupgrade.bin","state":"FIRMWARE_DOWNLOAD","last_changed":1682628473}
+                download-failure: 
+                  value: 
+                    {"state":"FIRMWARE_DOWNLOAD","last_changed":1682628379,"status":"FAIL","url":"https://badurl.com","error":"Unable to download file: curl: (28) Failed to connect to badurl.com port 443: Operation timed out\n"}
+                flashing-in-progress:
+                  value:
+                    {"status":"IN_PROGRESS","last_changed":1682628956,"state":"FIRMWARE_FLASHING"}
+                flashing-complete:
+                  value:
+                    {"status":"COMPLETE","last_changed":1682628969,"comment":"Reboot device for the new firmware to become active.","state":"FIRMWARE_FLASHING"}
+                
+                
 
         400:
           description: Failure response for an invalid request, such as missing one or more parameters.
