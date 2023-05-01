@@ -153,8 +153,9 @@ paths:
                 flashing-complete:
                   value:
                     {"status":"COMPLETE","last_changed":1682628969,"comment":"Reboot device for the new firmware to become active.","state":"FIRMWARE_FLASHING"}
-
-
+                flashing-failure:
+                  value:
+                    {"status":"FAIL","url":"Invalid firmware upgrade: local firmware file is missing.","state":"FIRMWARE_FLASHING","last_changed":1682890699}
         400:
           description: Failure response for an invalid request, such as missing one or more parameters.
           content:
@@ -288,7 +289,7 @@ paths:
           required: true
       responses: 
         200:
-          description: JSON object containing the requested stats. See output examples below.  These should roughly match up to what's shown in the web UI dashboard.
+          description: JSON object containing the requested stats. See output examples below.  These should roughly match up to what's shown in the web UI dashboard.  Note - in firmware v1.10.3 (earliest fw), the system stats response will NOT contain the firmware version field.
           content:
             application/json:
               schema:
