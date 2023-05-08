@@ -61,5 +61,5 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 ## Usage and examples
 
 * Usage tips and details on the <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api">Tachyon Support Site</a>
-* Some <a href="https://github.com/tachyon-networks/api_docs/tree/master/examples">example python scripts</a> (such as bulk firmware upgrade) can be found in this repo in the "Examples" folder.
+* Some <a href="https://github.com/tachyon-networks/api_docs/tree/master/_examples">example python scripts</a> (such as bulk firmware upgrade) can be found in this repo in the "_examples" folder.
 
