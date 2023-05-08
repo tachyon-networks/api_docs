@@ -4,35 +4,62 @@
 
 This repo contains the swagger-based docs for the Tachyon Networks Public API routes.  
 
-You can find usage of examples on the <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api">Tachyon Support Site</a>.
+## API Specs
 
-### Latest version
+<table>
+<tr> 
+<td><b>Version</b></td>
+<td><b>Date</b></td>
+<td><b>Firmware</b></td>
+<td><b>Swagger Docs</b></td>
+<td><b>Config Key Schema</b></td>
+<td><b>Notes </b></td>
+</tr>
 
-#### Version v1.0.1 
-* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/">API (Swagger) docs</a>
-* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/keys.html">supported configuration keys</a>
-* This applies to devices running firmwares v1.11.1 and later, unless otherwise noted.  
-* In this version, new configuration keys have been added to the config schema, but the API routes remain the same as the v1.0.0 API.
+<tr> <td colspan="6"> <br/><img width="15px" src="https://tachyon-networks.com/img/TNA30x-small.png"></img> &nbsp;<b>TNA-30x Product family</b> (60GHz wireless)  <br/> <br/></td></tr>
 
-*Release date: March 13, 2023*
+<tr> 
+<td>1.0.1 </td>
+<td>Mar. 13, 2023 </td>
+<td>v1.11.1+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/keys.html">Config keys</a> </td>
+<td> In this version, new configuration keys have been added to the config schema, but the API routes remain the same as the v1.0.0 API. </td>
+</tr>
 
----
+<tr> 
+<td>1.0.0 </td>
+<td>Jan. 9, 2023 </td>
+<td>v1.11.0</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/keys.html">Config keys</a> </td>
+<td></td>
+</tr>
 
-### Previous versions
+<tr> 
+<td><1.0.0 </td>
+<td>Oct. 1, 2022 </td>
+<td>v1.10.x</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/" target="_blank">API routes</a></td>
+<td>n/a </td>
+<td>API support is limited to the following routes:  `/login`, `/update` , `/reboot`, & `/stats` and configuration is not supported.</td>
+</tr>
 
-#### Version v1.0.0 
-* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/">API (Swagger) docs</a>
-* View <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/keys.html">supported configuration keys</a>
-* This applies to devices running firmwares v1.11.0 and later, unless otherwise noted.
+<tr> <td colspan="6"><br/><img width="50px"src="https://tachyon-networks.com/img/sw_small.png?sdfsdf"></img> <b>TNS-100 Product family</b> (PoE switches) <br/> <br/></td></tr>
 
-*Release date: January 9, 2023*
+<tr> 
+<td><1.0.0</td>
+<td>May. 30, 2023 </td>
+<td>vv1.12.0+ </td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.0/" target="_blank">API routes</a></td>
+<td>n/a </td>
+<td>Configuration is not supported in this version.</td>
+</tr>
 
-#### Pre-v1.0.0 Support
+<table>
 
-* API support in 1.10.x firmwares is limited to the following routes: 
-  * `/login`: `DELETE`, `POST` 
-  * `/update` : `GET`, `PUT`, `POST` (for firmware upgrade)
-  * `/reboot`: `POST`  
-  * `/stats`: `GET` (Note: firmware version is missing in the system stats response output)
-* The <a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/">v1.0.0 Swagger docs</a> can still be referenced for these routes.
+## Usage and examples
+
+* Usage tips and details on the <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api">Tachyon Support Site</a>
+* Some <a href="https://github.com/tachyon-networks/api_docs/examples/python">example python scripts</a> (such as bulk firmware upgrade) can be found in this repo in the "Examples" folder.
 
