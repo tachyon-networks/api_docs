@@ -1,0 +1,398 @@
+openapi: '3.0.2'
+info:
+  title: Tachyon Networks TNS-10x Public API v1.0.0
+  version: '1.0.0'
+  description: Use this API to access information and configure your Tachyon Networks TNS-10x devices.  This version applies to devices running firmware 1.12.0 and later unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tns-10x-restful-api" target="_new">here</a>.
+servers:
+  - url: http://{deviceMgmtIp}/cgi.lua/apiv1
+    variables:
+      deviceMgmtIp:
+        default: 192.168.2.1
+        description: Device's management IP address
+security:
+  - cookieAuth: []
+paths:
+  /login:
+    post:
+      description: Post login credentials to your device in order to authenticate your client.
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: 
+                  description: User's username
+                  type: string
+                  example: root
+                password:
+                  description: User's password
+                  type: string
+                  example: admin
+      responses: 
+        200:
+          description: Successful login response containing api token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  token:  
+                    type: string
+                    example: BCIHXGDDAAAAAAGVLFXNDYXRCCCJKGQFFA2F7BW2VPPN6===
+                    description: API token that will need to be included in subsequent API requests.
+                  level: 
+                    type: integer
+                    example: 0
+                    enum: [0,9]
+                    description: User access level.  0 = Admin, 9 = Read-only.
+                  auth: 
+                    type: boolean
+                    example: true
+                    description: Authorization status.
+        401:
+          description: Failed login response. 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+
+    delete:    
+      description: Logout of your API session.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API token representing the session you wish to delete.
+          required: true
+      responses:
+        200: 
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+  /reboot:
+    post:    
+      description: Reboot the device
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200: 
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+  /update:
+    get:
+      description: Get the current firmware task status details, if they exist.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200:
+          description: Response object containing details about the current firmware upgrade task. An empty object will be returned if no task exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    description: Status of the current firmware update task. 
+                    type: string
+                    enum: [FAIL, SUCCESS, IN_PROGRESS]
+                    example: FAIL
+                  state:
+                    description: Current state of the firmware update task. 
+                    type: string
+                    enum: [FIMRWARE_DOWNLOAD, FIRMWARE_FLASHING]
+                    example: FIMRWARE_DOWNLOAD
+                  last_changed:
+                    description: Timestamp of the last change to the firmware update task.
+                    type: integer
+                    example: 1621635010
+                  error: 
+                    description: Optional detailed error message in the case of the FAIL status.
+                    type: string
+                    example: "Unable to download file: curl(6) - Couldn't resolve host 'bad-firmware-url.com'"
+                  comment:
+                    description: Optional non-error comment/message regarding the task's current status.  This field is only populated after flashing is complete.
+                    type: string
+                    example: Reboot device for the new firmware to become active.
+                  URL: 
+                    description: Optional URL of the firmware provided by the user. Included for FIRMWARE_DOWNLOAD states.
+                    type: string
+                    example: https://bad-firmware.url
+              examples:
+                no-task: 
+                  value: 
+                    {}
+                bad-url: 
+                  value: 
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                download-success: 
+                  value: 
+                    {"status":"SUCCESS","url":"https://tachyon-networks.com/fw/tna-30x-1.11.1-r53981-20230426-tn-110-prs-squashfs-sysupgrade.bin","state":"FIRMWARE_DOWNLOAD","last_changed":1682628473}
+                download-failure: 
+                  value: 
+                    {"state":"FIRMWARE_DOWNLOAD","last_changed":1682628379,"status":"FAIL","url":"https://badurl.com","error":"Unable to download file: curl: (28) Failed to connect to badurl.com port 443: Operation timed out\n"}
+                flashing-in-progress:
+                  value:
+                    {"status":"IN_PROGRESS","last_changed":1682628956,"state":"FIRMWARE_FLASHING"}
+                flashing-complete:
+                  value:
+                    {"status":"COMPLETE","last_changed":1682628969,"comment":"Reboot device for the new firmware to become active.","state":"FIRMWARE_FLASHING"}
+                flashing-failure:
+                  value:
+                    {"status":"FAIL","url":"Invalid firmware upgrade: local firmware file is missing.","state":"FIRMWARE_FLASHING","last_changed":1682890699}
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples: 
+                invalid-url:
+                  value:
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}  
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+    put:
+      description: Instruct the device to asynchronously download a firmware file from the specified URL. 
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              required: [firmware_url]
+              type: object
+              properties:
+                firmware_url: 
+                  description: URL of firmware file.
+                  type: string
+                  example: https://tachyon-networks.com/firmware/tna-30x-1.11.0-upgrade-squashfs.bin
+      responses:
+        200: 
+          description: Success response returned after performing basic validation on the parameters. Use the GET /update route to fetch the actual download status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Description of the error.
+                    type: string
+                    example: Missing Firmware URL.
+    post:
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                reset: 
+                  description: (Optional) Whether or not the device should be reset to defaults after flashing is complete.
+                  type: boolean
+                  example: false 
+                  default: false  
+                force:
+                  description: (Optional) Whether or not the device should force flash the firmware image, even if it appears invalid.  Please contact support if you plan on using this field.
+                  type: boolean
+                  example: false 
+                  default: false 
+      description: Instruct the device to begin flashing the previously-downloaded firmware to the alternate bootbank, and optionally reset to defaults upon next bootup. This process will not affect the operation of the device - firmware will be updated only upon reboot.  The same goes for resetting to defaults. 
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200: 
+          description: Success response will be returned if firmware was successfully downloaded and validated, and flashing has begun.  Use the GET /update route to check on the status of the flashing process.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        400: 
+          description: Failure response for an invalid request, such as missing one or more parameters, or a missing firmware image.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                no-firmware-uploaded:
+                  value: {"statusCode":400,"error":{"details":"Invalid firmware upgrade: local firmware file is missing.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                bad-firmware-file:
+                  value: {"statusCode":400,"error":{"details":"Invalid firmware file: local firmware file didn't pass validation.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /stats:
+    get:
+      description: Fetch system, ethernet, and/or network statistics from the device.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+        - in: query
+          name: type
+          schema:
+            type: string
+            example: system,wireless
+          description: "Type of stats to fetch: system, ethernet, and/or network (multiple types can be specified in a comma-seperated list)."
+          required: true
+      responses: 
+        200:
+          description: JSON object containing the requested stats. See output examples below.  These should roughly match up to what's shown in the web UI dashboard.  Note - in firmware v1.10.3 (earliest fw), the system stats response will NOT contain the firmware version field.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                ethernet-stats:
+                  value: 
+                    {"ethernet":{"ports":{"eth0":{"rx_bytes":3437818,"tx_bytes":2899022,"link":true,"autoneg":true,"port":4,"tx_error":0,"rx_packets":39335,"speed":2500,"rx_error":0,"tx_packets":3638,"duplex":"full"},"eth1":{"rx_bytes":0,"tx_bytes":3471455,"link":false,"autoneg":true,"tx_packets":39261,"rx_packets":0,"tx_error":0,"port":3,"rx_error":0}},"switch_mac":"78:5E:E8:D0:FF:F1"}}  
+                system-stats:
+                  value:
+                    {"system":{"epoch_time":1672872740,"fw_version":"1.11.0 rev 53945","serial_no":"TNA30100036B10","cpu_usage_percent":0,"memory":{"used":133083136,"usage":32,"total":419270656,"free":286187520},"name":"Tachyon Networks PtMP","model":"TNA-301","location":"A/V Closet","hostname":"tachyon-ptmp-ap","clock_datetime":"2023/01/04 14:52:20","cpu_temp":47}}
+                network-stats:
+                  value:
+                    {"network":{"zones":{"wan":{"mgmt_vlan":{"enabled":false},"data_bridge":{"mac":"78:5E:E8:D0:FF:F1","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:fff1/64"]},"data_vlan":{"enabled":false},"ipv4":{"ip_address":["192.168.99.48/24"],"gateway":"192.168.99.1"},"interface":"br-wan"}}},"dns":{"wan":["1.1.1.1","1.0.0.1"],"dhcp.br-wan":["1.1.1.1","8.8.8.8"]},"hostname":"tachyon-ptmp-ap","dhcp_status":{"br-wan":[[{"discovery":true,"lease_server":"192.168.99.1","fallback":{"prefix":24,"ip":"192.168.1.1"},"custom_dns":true,"ip":"192.168.99.48","prefix":24,"gateway":"192.168.99.1","metric":0,"lease_acquired":1672872614,"status":"renew","lease_lifetime":600}]]},"dns6":{"wan":{},"dhcp.br-wan":{}}}}
+                network-stats-with-vlans:
+                  value: 
+                    {"network":{"zones":{"wan":{"mgmt_vlan":{"enabled":true,"ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:1020/64"]},"vlan_id":106,"ipv4":{"ip_address":["192.168.201.150/24"],"gateway":"192.168.201.1"},"mac":"78:5E:E8:D0:10:20","interface":"br-mgmt106"},"data_bridge":{"mac":"78:5E:E8:D0:10:20","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:1020/64"]},"data_vlan":{"enabled":true,"vlan_id":99},"ipv4":{"ip_address":["192.168.3.1/24"]},"interface":"br-wan"}}},"dns":{"wan":{},"dhcp.br-mgmt106":["8.8.8.8"]},"hostname":"tachyon-networks","dhcp_status":{"br-mgmt106":[[{"discovery":true,"lease_server":"192.168.201.1","fallback":{"prefix":24,"ip":"192.168.1.2"},"custom_dns":true,"ip":"192.168.201.150","prefix":24,"metric":0,"gateway":"192.168.201.1","lease_acquired":1672872914,"status":"renew","lease_lifetime":600}]]},"dns6":{"wan":{},"dhcp.br-mgmt106":{}}}}
+  /poe_reset:   
+    post:
+        description: Power cycle a PoE-out port on the TNS.
+        parameters:
+          - in: cookie
+            name: api_token
+            schema:
+              type: string
+            description: API auth token.
+            required: true
+        requestBody:
+          content: 
+            application/json:
+              schema:
+                required: [port]
+                type: object
+                properties:
+                  port: 
+                    description: Name of interface to powercycle (eth1, eth2, etc...)
+                    type: string
+                    example: eth2
+      
+        responses: 
+          400:
+            description: Failure response for an invalid request, such as missing one or more parameters.
+            content:
+              application/json:
+                schema:
+                  type: object
+                examples: 
+                  missing-port:
+                    value:
+                      {"statusCode":400,"error":{"details":"Port not provided","path":"/cgi.lua/apiv1/poe_reset"},"description":"Bad Request"}  
+                  bad-port-name:
+                    value:
+                      {"statusCode":400,"error":{"details":"Port not valid","path":"/cgi.lua/apiv1/poe_reset"},"description":"Bad Request"}
+                  not-poe-port:
+                    value:
+                      {"statusCode":400,"error":{"details":"Port does not support PoE out","path":"/cgi.lua/apiv1/poe_reset"},"description":"Bad Request"}
+          401:
+            description: Unauthorized.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/GenericFailureReponse'
+    
+          200:
+            description: Ok status response.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/GenericSuccessReponse'        
+components:
+  securitySchemes:
+    cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
+      type: apiKey
+      in: cookie
+      name: api_token
+  schemas:
+    GenericSuccessReponse:
+      type: object
+      properties:
+        status:
+          description: Status of the response. 
+          type: string
+          example: ok
+    GenericFailureReponse:
+      type: object
+      properties: 
+        statusCode: 
+          description: Error status code matching HTTP status code.
+          type: integer
+          example: 401
+        description:
+          description: Short description of the error.
+          example: Unauthorized
+          type: string
+        error: 
+          type: object
+          properties:
+            details:
+              description: Detailed error message.
+              type: string
+              example: Authorization Failed
+            path:
+              type: string
+              description: Route where this error occurred.
+              example: /cgi.lua/apiv1/stats
+
+      
