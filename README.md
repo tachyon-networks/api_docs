@@ -23,7 +23,8 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><b>Notes </b></td>
 </tr>
 
-<tr> <td colspan="6"> <br/> <img width="15px" src="https://tachyon-networks.com/img/TNA30x-small.png"/> <b> TNA-30x Product family</b> (60GHz wireless)  <br/> <br/></td></tr>
+<tr> <td colspan="6"> <br/> <img width="13px" src="https://tachyon-networks.com/img/TNA30x-small.png"/> 
+  <br><b> TNA-30x Product family</b>  <br>(60GHz wireless)  <br/> <br/></td></tr>
 
 <tr> 
 <td>1.0.1 </td>
@@ -52,7 +53,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td>API support is limited to the following routes:  /login, /update, /reboot, & /stats, and configuration is not supported.</td>
 </tr>
 
-<tr> <td colspan="6"><br/><img width="50px" src="https://tachyon-networks.com/img/sw_small.png"/> <b>TNS-100 Product family</b> (PoE switches) <br/> <br/></td></tr>
+<tr> <td colspan="6"><br/><img width="50px" src="https://tachyon-networks.com/img/sw_small.png"/>  <br><b>TNS-100 Product family</b>  <br>(PoE switches) <br/> <br/></td></tr>
 
 <tr> 
 <td><1.0.0</td>
