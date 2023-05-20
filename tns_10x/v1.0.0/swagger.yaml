@@ -269,9 +269,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
-  /stats:
+  /stats*:
     get:
-      description: Fetch system, ethernet, and/or network statistics from the device.
+      description: Fetch system, ethernet, interface and/or network statistics from the device.  (*) NOTE - these stats are currently in beta and may change in the next version!
       parameters:
         - in: cookie
           name: api_token
@@ -283,8 +283,8 @@ paths:
           name: type
           schema:
             type: string
-            example: system,wireless
-          description: "Type of stats to fetch: system, ethernet, and/or network (multiple types can be specified in a comma-seperated list)."
+            example: system,ethernet
+          description: "Type of stats to fetch: system, ethernet, interfaces, and/or network (multiple types can be specified in a comma-seperated list)."
           required: true
       responses: 
         200:
@@ -294,18 +294,228 @@ paths:
               schema:
                 type: object
               examples:
+                interface-stats:
+                  value:
+                    {"interfaces":{"eth2":{"rx_bytes":0,"disabled":false,"mtu":9018,"if_index":11,"routes":[],"tx_packets":61583,"rx_packets":0,"ip6_address":["fe80::7a5e:e8ff:fed0:3/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"","poe_out":false},"tx_bytes":5397316,"mac_address":"78:5E:E8:D0:00:03","rx_errors":0},"eth4":{"rx_bytes":0,"disabled":false,"mtu":9018,"if_index":9,"routes":[],"tx_packets":61585,"rx_packets":0,"ip6_address":["fe80::7a5e:e8ff:fed0:5/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"","poe_out":false},"tx_bytes":5397448,"mac_address":"78:5E:E8:D0:00:05","rx_errors":0},"eth3":{"rx_bytes":0,"disabled":false,"mtu":9018,"if_index":10,"routes":[],"tx_packets":61585,"rx_packets":0,"ip6_address":["fe80::7a5e:e8ff:fed0:4/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"","poe_out":false},"tx_bytes":5397448,"mac_address":"78:5E:E8:D0:00:04","rx_errors":0},"lo":{"rx_bytes":7588,"tx_drop":0,"tx_bytes":7588,"mtu":65536,"if_index":1,"ip_address":["127.0.0.1/8"],"mac_address":"00:00:00:00:00:00","disabled":false,"rx_errors":0,"tx_packets":115,"routes":[],"rx_packets":115,"tx_errors":0,"ip6_address":["::1/128"],"routes6":[],"rx_drop":0},"eth5":{"rx_bytes":5702710871,"disabled":false,"mtu":9018,"if_index":8,"routes":[],"tx_packets":4756618,"rx_packets":5295543,"ip6_address":["fe80::7a5e:e8ff:fed0:6/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":1,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":""},"tx_bytes":6359992414,"mac_address":"78:5E:E8:D0:00:06","rx_errors":0},"br-wan":{"rx_bytes":5455106601,"disabled":false,"mtu":1500,"if_index":18,"routes":["192.168.99.0/24"],"tx_packets":788512,"rx_packets":2244744,"ip6_address":["2600:8807:93e0:1000:7a5e:e8ff:fed0:1/64","fe80::7a5e:e8ff:fed0:1/64"],"routes6":["2600:8807:93e0:1000::/64","fe80::/64"],"tx_drop":0,"rx_drop":93608,"wrap":"wan","mac_address":"78:5E:E8:D0:00:01","ip_address":["192.168.99.63/24"],"rx_errors":0,"gateway":"192.168.99.1","tx_errors":0,"tx_bytes":6097292156,"gateway6":"fe80::de2c:6eff:fe44:947"},"eth0":{"rx_bytes":586330,"disabled":false,"mtu":9018,"if_index":13,"routes":[],"tx_packets":463303,"rx_packets":4237,"ip6_address":["fe80::7a5e:e8ff:fed0:1/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":""},"tx_bytes":54047436,"mac_address":"78:5E:E8:D0:00:01","rx_errors":0},"eth1":{"rx_bytes":125885865,"disabled":false,"mtu":9018,"if_index":12,"routes":[],"tx_packets":608852,"rx_packets":123328,"ip6_address":["fe80::7a5e:e8ff:fed0:2/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"TNS-301 99.48","poe_out":true},"tx_bytes":67070286,"mac_address":"78:5E:E8:D0:00:02","rx_errors":0}}}
                 ethernet-stats:
                   value: 
-                    {"ethernet":{"ports":{"eth0":{"rx_bytes":3437818,"tx_bytes":2899022,"link":true,"autoneg":true,"port":4,"tx_error":0,"rx_packets":39335,"speed":2500,"rx_error":0,"tx_packets":3638,"duplex":"full"},"eth1":{"rx_bytes":0,"tx_bytes":3471455,"link":false,"autoneg":true,"tx_packets":39261,"rx_packets":0,"tx_error":0,"port":3,"rx_error":0}},"switch_mac":"78:5E:E8:D0:FF:F1"}}  
+                    {
+                    "ethernet": {
+                      "ports": {
+                        "eth2": {
+                          "mac": "78:5E:E8:D0:00:13",
+                          "poe_out": false,
+                          "name": "eth2",
+                          "link": true,
+                          "speed": 2500,
+                          "autoneg": true,
+                          "duplex": "full",
+                          "desc": ""
+                        },
+                        "eth4": {
+                          "mac": "78:5E:E8:D0:00:15",
+                          "name": "eth4",
+                          "link": false,
+                          "autoneg": true,
+                          "poe_out": true,
+                          "desc": "TNA-302 STA: John Doe"
+                        },
+                        "eth3": {
+                          "mac": "78:5E:E8:D0:00:14",
+                          "name": "eth3",
+                          "link": false,
+                          "autoneg": true,
+                          "poe_out": false,
+                          "desc": ""
+                        },
+                        "eth5": {
+                          "mac": "78:5E:E8:D0:00:16",
+                          "name": "eth5",
+                          "link": true,
+                          "speed": 10000,
+                          "autoneg": false,
+                          "duplex": "full",
+                          "desc": ""
+                        },
+                        "eth0": {
+                          "mac": "78:5E:E8:D0:00:11",
+                          "name": "eth0",
+                          "link": true,
+                          "speed": 2500,
+                          "autoneg": true,
+                          "duplex": "full",
+                          "desc": ""
+                        },
+                        "eth1": {
+                          "mac": "78:5E:E8:D0:00:12",
+                          "poe_out": false,
+                          "name": "eth1",
+                          "link": true,
+                          "speed": 2500,
+                          "autoneg": true,
+                          "duplex": "full",
+                          "desc": ""
+                        }
+                      },
+                      "sfp": {
+                        "brand": "FS",
+                        "diagnostics_support": "No",
+                        "sku": "SFP-10GLRM-31",
+                        "serial": "F2140164236"
+                      }
+                    }
+                  }
                 system-stats:
                   value:
-                    {"system":{"epoch_time":1672872740,"fw_version":"1.11.0 rev 53945","serial_no":"TNA30100036B10","cpu_usage_percent":0,"memory":{"used":133083136,"usage":32,"total":419270656,"free":286187520},"name":"Tachyon Networks PtMP","model":"TNA-301","location":"A/V Closet","hostname":"tachyon-ptmp-ap","clock_datetime":"2023/01/04 14:52:20","cpu_temp":47}}
-                network-stats:
+                    {
+                    "system": {
+                      "epoch_time": 1684431063,
+                      "fw_version": "1.12.0 rev 55325",
+                      "serial_no": "TNS100ABCDEFH",
+                      "cpu_usage_percent": 0,
+                      "memory": {
+                        "used": 119246848,
+                        "usage": 31,
+                        "total": 389386240,
+                        "free": 270139392
+                      },
+                      "name": "TNS-100",
+                      "model": "TNS-100",
+                      "location": "Main office - cube 2",
+                      "hostname": "tachyon-networks-tns-100",
+                      "clock_datetime": "2023/05/18 12:31:03",
+                      "cpu_temp": 52
+                    }
+                  }
+                network-stats-with-default-mgmt-vlan:
                   value:
-                    {"network":{"zones":{"wan":{"mgmt_vlan":{"enabled":false},"data_bridge":{"mac":"78:5E:E8:D0:FF:F1","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:fff1/64"]},"data_vlan":{"enabled":false},"ipv4":{"ip_address":["192.168.99.48/24"],"gateway":"192.168.99.1"},"interface":"br-wan"}}},"dns":{"wan":["1.1.1.1","1.0.0.1"],"dhcp.br-wan":["1.1.1.1","8.8.8.8"]},"hostname":"tachyon-ptmp-ap","dhcp_status":{"br-wan":[[{"discovery":true,"lease_server":"192.168.99.1","fallback":{"prefix":24,"ip":"192.168.1.1"},"custom_dns":true,"ip":"192.168.99.48","prefix":24,"gateway":"192.168.99.1","metric":0,"lease_acquired":1672872614,"status":"renew","lease_lifetime":600}]]},"dns6":{"wan":{},"dhcp.br-wan":{}}}}
-                network-stats-with-vlans:
+                    {
+                    "network": {
+                      "zones": {
+                        "wan": {
+                          "mgmt": {
+                            "mac": "78:5E:E8:D0:00:01",
+                            "ipv6": {
+                              "ip_address": [
+                                "2600:8807:93e0:1000:7a5e:e8ff:fed0:1/64",
+                                "fe80::7a5e:e8ff:fed0:1/64"
+                              ],
+                              "gateway": "fe80::de2c:6eff:fe44:947"
+                            },
+                            "mtu": 1500,
+                            "vlan_id": 1,
+                            "ipv4": {
+                              "ip_address": [
+                                "192.168.99.63/24"
+                              ],
+                              "gateway": "192.168.99.1"
+                            },
+                            "interface": "br-wan"
+                          }
+                        }
+                      },
+                      "dns": {
+                        "dhcp.br-wan": [
+                          "1.1.1.1",
+                          "8.8.8.8"
+                        ]
+                      },
+                      "hostname": "tns-100",
+                      "dhcp_status": {
+                        "br-wan": [
+                          [
+                            {
+                              "discovery": true,
+                              "lease_server": "192.168.99.1",
+                              "fallback": {
+                                "prefix": 24,
+                                "ip": "192.168.1.1"
+                              },
+                              "custom_dns": false,
+                              "ip": "192.168.99.63",
+                              "status": "renew",
+                              "prefix": 24,
+                              "metric": 0,
+                              "gateway": "192.168.99.1",
+                              "lease_acquired": 1684588484,
+                              "dns": [
+                                "1.1.1.1",
+                                "8.8.8.8"
+                              ],
+                              "lease_lifetime": 600
+                            }
+                          ]
+                        ]
+                      },
+                      "dns6": {
+                        "dhcp.br-wan": {}
+                      }
+                    }
+                  }
+                network-stats-non-native-mgmt-vlan:
                   value: 
-                    {"network":{"zones":{"wan":{"mgmt_vlan":{"enabled":true,"ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:1020/64"]},"vlan_id":106,"ipv4":{"ip_address":["192.168.201.150/24"],"gateway":"192.168.201.1"},"mac":"78:5E:E8:D0:10:20","interface":"br-mgmt106"},"data_bridge":{"mac":"78:5E:E8:D0:10:20","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:1020/64"]},"data_vlan":{"enabled":true,"vlan_id":99},"ipv4":{"ip_address":["192.168.3.1/24"]},"interface":"br-wan"}}},"dns":{"wan":{},"dhcp.br-mgmt106":["8.8.8.8"]},"hostname":"tachyon-networks","dhcp_status":{"br-mgmt106":[[{"discovery":true,"lease_server":"192.168.201.1","fallback":{"prefix":24,"ip":"192.168.1.2"},"custom_dns":true,"ip":"192.168.201.150","prefix":24,"metric":0,"gateway":"192.168.201.1","lease_acquired":1672872914,"status":"renew","lease_lifetime":600}]]},"dns6":{"wan":{},"dhcp.br-mgmt106":{}}}}
+                    {
+                    "network": {
+                      "zones": {
+                        "wan": {
+                          "mgmt": {
+                            "mac": "78:5E:E8:D0:00:11",
+                            "ipv6": {
+                              "ip_address": [
+                                "fe80::7a5e:e8ff:fed0:11/64"
+                              ]
+                            },
+                            "mtu": 1501,
+                            "vlan_id": 106,
+                            "ipv4": {
+                              "ip_address": [
+                                "192.168.201.159/24"
+                              ],
+                              "gateway": "192.168.201.1"
+                            },
+                            "interface": "br-wan.106"
+                          }
+                        }
+                      },
+                      "dns": {
+                        "dhcp.br-wan.106": [
+                          "8.8.8.8"
+                        ]
+                      },
+                      "hostname": "tachyon-networks-tns-100",
+                      "dhcp_status": {
+                        "br-wan.106": [
+                          [
+                            {
+                              "discovery": true,
+                              "lease_server": "192.168.201.1",
+                              "fallback": {
+                                "prefix": 24,
+                                "ip": "192.168.2.1"
+                              },
+                              "custom_dns": false,
+                              "ip": "192.168.201.159",
+                              "metric": 0,
+                              "prefix": 24,
+                              "status": "renew",
+                              "gateway": "192.168.201.1",
+                              "lease_acquired": 1684588664,
+                              "dns": [
+                                "8.8.8.8"
+                              ],
+                              "lease_lifetime": 600
+                            }
+                          ]
+                        ]
+                      },
+                      "dns6": {
+                        "dhcp.br-wan.106": {}
+                      }
+                    }
+                  }
+                network-stats-static-ip:
+                  value: 
+                    {"network":{"zones":{"wan":{"mgmt":{"mac":"78:5E:E8:D0:00:01","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:1/64"]},"mtu":1500,"vlan_id":1,"ipv4":{"ip_address":["192.168.99.178/24"],"gateway":"192.168.99.1"},"interface":"br-wan"}}},"dns":{"wan":["1.1.1.1","8.8.8.8"]},"hostname":"tns-100","dhcp_status":{},"dns6":{"wan":{}}}}
   /poe_reset:   
     post:
         description: Power cycle a PoE-out port on the TNS.
