@@ -373,6 +373,16 @@ paths:
                       "fw_version": "1.12.0 rev 55325",
                       "serial_no": "TNS100ABCDEFH",
                       "cpu_usage_percent": 0,
+                        "bootbanks": {
+                          "backup": {
+                            "firmux": "1.12.0 rev 55342",
+                            "bootbank": 1
+                          },
+                          "active": {
+                            "firmux": "1.12.0 rev 55344",
+                            "bootbank": 2
+                          }
+                        },
                       "memory": {
                         "used": 119246848,
                         "usage": 31,
