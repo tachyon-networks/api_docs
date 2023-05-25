@@ -375,11 +375,11 @@ paths:
                       "cpu_usage_percent": 0,
                         "bootbanks": {
                           "backup": {
-                            "firmux": "1.12.0 rev 55342",
+                            "version": "1.12.0 rev 55342",
                             "bootbank": 1
                           },
                           "active": {
-                            "firmux": "1.12.0 rev 55344",
+                            "version": "1.12.0 rev 55344",
                             "bootbank": 2
                           }
                         },
@@ -578,6 +578,171 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/GenericSuccessReponse'        
+  /bridge_table:
+    get:
+      description: Get the output of the bridge table.
+      responses: 
+        200:
+          description: JSON object containing this device's bridge table entries.  The value for the bridge_table field will be an empty object {} when there are no entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  bridge_table:  
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        mac:
+                          description: MAC address of the bridge table entry.
+                          type: string
+                          example: 78:28:ca:32:3c:08
+                        bridge: 
+                          description: The name of the bridge interface containing this MAC.
+                          type: string
+                          example: br-wan
+                        iface:
+                          description: The interface behind which this MAC address lives. 
+                          type: string
+                          example: eth0
+              examples:
+                bridge-table: 
+                  value:
+                    {
+                    "bridge_table": [
+                      {
+                        "mac": "44:07:0b:63:8d:11",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:d0:01:2a",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "44:61:32:7a:02:41",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "94:9f:3e:03:01:ec",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:00:05:b8",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "1c:57:dc:2f:31:5b",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "94:9f:3e:03:0a:f4",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:b5:8f:ed",
+                        "bridge": "99",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "dc:2c:6e:44:09:47",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:d0:00:22",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "94:9f:3e:7c:9b:aa",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "1c:57:dc:7e:99:99",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "64:d2:c4:a6:67:ad",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "cc:40:d0:02:96:9f",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "04:5d:4b:2c:10:b5",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "3c:8c:f8:fd:9d:ed",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "24:5e:be:66:63:32",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:6f:bb:4e",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "0c:62:a6:98:b9:21",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:b5:8f:ed",
+                        "bridge": "106",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:3b:d0:b4",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:00:00:03",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      }
+                    ]
+                  }
+                empty:
+                  value: {"bridge_table":{}}
+
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              example:
+                unauth:
+                  {
+                  "statusCode": 401,
+                  "description": "Unauthorized",
+                  "error": {
+                    "details": "Authorization Failed",
+                    "path": "/cgi.lua/apiv1/bridge_table"
+                  }
+                }
+ 
 components:
   securitySchemes:
     cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
