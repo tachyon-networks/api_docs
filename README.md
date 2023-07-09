@@ -28,8 +28,8 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 
 <tr> 
 <td>1.0.2 </td>
-<td>July 7, 2023 </td>
-<td>v1.12.1+</td>
+<td>July 9, 2023 </td>
+<td>v1.11.2+</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.2/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.2/keys.html">Config keys</a> </td>
 <td>New keys have been added to the config schema to support failover and station SSID profiles.  The output of some of the stats has been expanded upon (discovery/device info added to wireless peers, and bootbank firmware versions added to system stats). </td>
