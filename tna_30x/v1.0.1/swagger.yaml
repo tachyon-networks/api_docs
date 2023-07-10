@@ -663,11 +663,17 @@ paths:
                           example: false
                           description: Whether or not a reboot is required to apply these changes.
                         warnings:
-                          description: JSON object containing config key warings. Object key is key path, and warning message is the value. 
+                          description: JSON object containing config key warnings. 
                           type: object
+                        keys_added:
+                          type: object
+                          description: JSON object containing new config keys. 
+                        keys_removed:
+                          type: object
+                          description: JSON object containing removed config keys. 
                         keys_changed:
                           type: object
-                          description: JSON object containing changed config keys. Object key is changed key path, and object value is anothe object containing new and previous values (see examples).
+                          description: JSON object containing changed config keys. 
                           
               examples:
                 dry-run-ap-to-sta-mode-with-traffic-shaping: 
