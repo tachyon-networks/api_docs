@@ -644,50 +644,51 @@ paths:
       description: Update the device's configuration and restart networking services, or perform a dry run.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
       responses:
         200:
-          description: An array of length 1, with a JSON object containing the information related to a configuration update operation.
+          description: JSON object containing the information related to a successful configuration update operation.
           content:
             application/json:
               schema:
-                type: array
-                example:
-                  [
-                    {
-                    "status_message": "Dry run only, no changes made on this device.",
-                    "response": {
-                      "reboot_required": true,
-                      "keys_removed": {"wireless.radios.wlan0.channel":6},
-                      "keys_added": {"network.traffic_control.limit_upload.rate_limit":100},
-                      "keys_changed": {"wireless.radios.wlan0.mode":{"new":"sta","prev":"ap"},"network.traffic_control.limit_upload.enabled":{"new":true,"prev":false}},
-                      "warnings": { "wireless.radios.wlan0.channel":"The key wireless.radios.wlan0.channel is dependent on key wireless.radios.wlan0.mode being set to ap, which it isn't, and will be ignored." }
-                    }
-                    }
-                  ]
-                items:
-                  type: object
-                  properties:
-                    status_message:
-                        description: Detailed status message.
-                        example: Configuration saved, applying changes now.
-                        type: string
+                type: object
+                properties:
+                  status_message:
+                      description: Detailed status message.
+                      example: Configuration saved, applying changes now.
+                      type: string
+                  response:
+                      description: JSON object containing information about the config update operation.
+                      type: object 
+                      properties: 
+                        reboot_required: 
+                          type: boolean
+                          example: false
+                          description: Whether or not a reboot is required to apply these changes.
+                        warnings:
+                          description: JSON object containing config key warings. Object key is key path, and warning message is the value. 
+                          type: object
+                        keys_changed:
+                          type: object
+                          description: JSON object containing changed config keys. Object key is changed key path, and object value is anothe object containing new and previous values (see examples).
+                          
+              examples:
+                dry-run-ap-to-sta-mode-with-traffic-shaping: 
+                  value:
+                    status_message: Dry run only, no changes made on this device.
                     response:
-                        description: A JSON object containing the information related to a configuration update operation.
-                        type: object 
-                        properties: 
-                          reboot_required: 
-                            type: boolean
-                            description: Whether or not a reboot is required to apply these changes.
-                          warnings:
-                            description: JSON object containing config key warings. Object key is key path, and warning message is the value. 
-                            type: object
-                          keys_changed:
-                            type: object
-                            description: JSON object containing changed config keys.
-                          keys_removed:
-                            type: object
-                            description: JSON object containing removed config keys. 
-                          keys_added:
-                            type: object
-                            description: JSON object containing new config keys. 
+                      reboot_required: true
+                      keys_removed: {"wireless.radios.wlan0.channel":6}
+                      keys_added: {"network.traffic_control.limit_upload.rate_limit":100}
+                      keys_changed: {"wireless.radios.wlan0.mode":{"new":"sta","prev":"ap"},"network.traffic_control.limit_upload.enabled":{"new":true,"prev":false}}
+                      warnings: { "wireless.radios.wlan0.channel":"The key wireless.radios.wlan0.channel is dependent on key wireless.radios.wlan0.mode being set to ap, which it isn't, and will be ignored." }
+                config-change-add-user: 
+                  value:
+                    status_message: Configuration saved, applying changes now.
+                    response:
+                      reboot_required: false
+                      keys_removed: {}
+                      keys_added: {"system.users.4":{"username":"guest1","type":"read-only","password_hash":"$1$ohSsj1Ga$xF6ruORwRp1TNYmUjRgQn0", "enabled":true}}
+                      keys_changed: {}
+                      warnings: {}
+                      
         500: 
           description: JSON object containing error information in the event that a system or fatal error occurs.
           content:
