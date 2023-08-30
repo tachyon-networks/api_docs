@@ -14,7 +14,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 ## API Specs
 
 <table>
-<tr> <td colspan="6"> <br/> <img width="25px" src="https://tachyon-networks.com/img/TNA30x-small.png""/> 
+<tr> <td colspan="6"> <br/> <img width="20px" src="https://tachyon-networks.com/img/TNA30x-small.png"/> 
   <br><b> TNA-30x Product family</b> (60GHz wireless)  <br/> <br/></td></tr>
 
 <tr> 
