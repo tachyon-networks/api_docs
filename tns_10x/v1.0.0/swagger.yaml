@@ -2,7 +2,7 @@ openapi: '3.0.2'
 info:
   title: Tachyon Networks TNS-10x Public API v1.0.0
   version: '1.0.0'
-  description: Use this API to access information and configure your Tachyon Networks TNS-10x devices.  This version applies to devices running firmware 1.12.0 and later unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tns-10x-restful-api" target="_new">here</a>.
+  description: Use this API to access information and configure your Tachyon Networks TNS-10x devices.  This version applies to devices running firmware 1.12.1 and later unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tns-10x-restful-api" target="_new">here</a>.
 servers:
   - url: http://{deviceMgmtIp}/cgi.lua/apiv1
     variables:
@@ -269,9 +269,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
-  /stats*:
+  /stats:
     get:
-      description: Fetch system, ethernet, interface and/or network statistics from the device.  (*) NOTE - these stats are currently in beta and may change in the next version!
+      description: Fetch system, ethernet, interface and/or network statistics from the device.
       parameters:
         - in: cookie
           name: api_token
@@ -742,7 +742,178 @@ paths:
                     "path": "/cgi.lua/apiv1/bridge_table"
                   }
                 }
- 
+  /config:
+    get:
+      description: Get the device's current configuration.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+      responses:
+        200:
+          description: JSON object containing the device's current configuration.  
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"config":{"interfaces":{"ports":{"eth2":{"enabled":true,"description":"Back up TNA 302 AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth4":{"enabled":true,"description":"TNA 301 Demo AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth3":{"enabled":true,"description":"UBNT 5Ghz radio","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth5":{"enabled":true,"description":"","isolation_rules":[],"vlans":{"management":true,"trunk":[99,106],"access":[]},"enable_sfp_1g_support":false},"eth0":{"enabled":true,"vlans":{"management":true,"trunk":[99,106],"access":[]},"description":"","isolation_rules":[]},"eth1":{"enabled":true,"description":"","isolation_rules":[],"poe_out":false,"vlans":{"management":true,"trunk":[99,106],"access":[]}}},"port_mtu":9018},"system":{"device_name":"Tachyon Networks TNS-100","reset_button":{"enabled":true},"hostname":"tns-100","users":[{"username":"root","type":"admin","password_hash":"$1$6Hzch.yD$ULugJ982Yb1D0g8zhqv3T.","enabled":true}],"device_location":"office closet","device_description":"Dev switch in office closet","timezone":"America/Los_Angeles"},"network":{"wan":{"management":{"vlan_id":1},"ipv6":{"enabled":false},"mtu":1500,"ipv4":{"enabled":true,"prefix":24,"ipaddr":"192.168.1.1"},"vlans":[{"vlan_id":1,"label":"Management"}],"ip_mode":"dhcp"}},"services":{"snmp":{"v2":{"enabled":true,"community":"public"},"v3":{"enabled":false}},"ping_watchdog":{"enabled":false},"http":{"https_port":443,"port":80},"remote_syslog":{"enabled":false},"snmp_traps":{"enabled":false},"discovery":{"enabled":true,"broadcast_protocols":{"lldp":true,"cdp":true,"mndp":true},"lldp_server":{"enabled":true}},"ntp":{"enabled":true,"servers":["time.cloudflare.com","time.google.com"]}}}}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              example:
+                unauth:
+                  {
+                  "statusCode": 401,
+                  "description": "Unauthorized",
+                  "error": {
+                    "details": "Authorization Failed",
+                    "path": "/cgi.lua/apiv1/config"
+                  }
+                }
+        500:
+          description: JSON object containing error information in the event that a system or fatal error occurs while fetching the config.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              example:
+                unauth:
+                  {
+                  "statusCode": 500,
+                  "description": "Internal Server Error",
+                  "error": {
+                    "details": "System error - internal conversion failed: (internal error detail here)",
+                    "path": "/cgi.lua/apiv1/config"
+                  }
+                }
+    post:
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                dry_run: 
+                  description: Whether or not this should be a dry run - meaning the device's configuration will not be affected.  Set this flag if you wish to check for any errors or to view the list of changed keys before making any real changes.
+                  type: boolean
+                  example: false
+                config:
+                  description: The JSON object representing this device's configuration. Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+                  type: object
+                  example: {"config":{"interfaces":{"ports":{"eth2":{"enabled":true,"description":"Back up TNA 302 AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth4":{"enabled":true,"description":"TNA 301 Demo AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth3":{"enabled":true,"description":"UBNT 5Ghz radio","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth5":{"enabled":true,"description":"","isolation_rules":[],"vlans":{"management":true,"trunk":[99,106],"access":[55]},"enable_sfp_1g_support":false},"eth0":{"enabled":true,"vlans":{"management":true,"trunk":[99,106],"access":[]},"description":"","isolation_rules":[]},"eth1":{"enabled":true,"description":"","isolation_rules":[],"poe_out":false,"vlans":{"management":true,"trunk":[99,106],"access":[]}}},"port_mtu":9018},"system":{"device_name":"Tachyon Networks TNS-100","reset_button":{"enabled":true},"hostname":"tns-100","users":[{"username":"root","type":"admin","password_hash":"$1$6Hzch.yD$ULugJ982Yb1D0g8zhqv3T.","enabled":true}],"device_location":"office closet","device_description":"new value","timezone":"America/Los_Angeles"},"network":{"wan":{"management":{"vlan_id":1},"ipv6":{"enabled":false},"mtu":1500,"ipv4":{"enabled":true,"prefix":24,"ipaddr":"192.168.1.1"},"vlans":[{"vlan_id":1,"label":"Management"}],"ip_mode":"dhcp"}},"services":{"snmp":{"v2":{"enabled":true,"community":"public"},"v3":{"enabled":false}},"ping_watchdog":{"enabled":false},"http":{"https_port":443,"port":80},"remote_syslog":{"enabled":false},"snmp_traps":{"enabled":false},"discovery":{"enabled":true,"broadcast_protocols":{"lldp":true,"cdp":true,"mndp":true},"lldp_server":{"enabled":true}},"ntp":{"enabled":true,"servers":["time.cloudflare.com","time.google.com"]}}}}
+      description: Update the device's configuration and restart networking services, or perform a dry run.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+      responses:
+        200:
+          description: JSON object containing the information related to a successful configuration update operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_message:
+                      description: Detailed status message.
+                      example: Configuration saved, applying changes now.
+                      type: string
+                  response:
+                      description: JSON object containing information about the config update operation.
+                      type: object 
+                      properties: 
+                        reboot_required: 
+                          type: boolean
+                          example: false
+                          description: Whether or not a reboot is required to apply these changes.
+                        warnings:
+                          description: JSON object containing config key warnings. 
+                          type: object
+                        keys_added:
+                          type: object
+                          description: JSON object containing new config keys. 
+                        keys_removed:
+                          type: object
+                          description: JSON object containing removed config keys. 
+                        keys_changed:
+                          type: object
+                          description: JSON object containing changed config keys. 
+                          
+              examples:
+                config-change-add-vlans:
+                config-change-add-isolation-rules:
+                config-change-add-user: 
+                  value:
+                    status_message: Configuration saved, applying changes now.
+                    response:
+                      reboot_required: false
+                      keys_removed: {}
+                      keys_added: {"system.users.4":{"username":"guest1","type":"read-only","password_hash":"$1$ohSsj1Ga$xF6ruORwRp1TNYmUjRgQn0", "enabled":true}}
+                      keys_changed: {}
+                      warnings: {}
+                      
+        500: 
+          description: JSON object containing error information in the event that a system or fatal error occurs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  statusCode: 
+                    description: Error status code matching HTTP status code.
+                    type: integer
+                    example: 500
+                  description:
+                    description: Short description of the error.
+                    example: Internal Server Error
+                    type: string
+                  error: 
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: "System error - failed to run config validation: (internal error detail here)"
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/config
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters, or for passing an invalid config JSON object. For an invalid config, only the first error is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Short description of the error.
+                    example: Bad Request
+                    type: string
+                  error: 
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: Missing config in POST data.
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/config
+              examples:
+                invalid-config-key: 
+                  value:
+                    statusCode: 400
+                    description: "Bad Request"
+                    error:
+                      details: "Configuration validation failed: The key interfaces.ports.eth2.poe_out is required but not included in the input."
+                      path: "/cgi.lua/apiv1/config"
+     
 components:
   securitySchemes:
     cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
