@@ -14,7 +14,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 ## API Specs
 
 <table>
-<tr> <td colspan="6"> <br/> <img width="25px" src="https://tachyon-networks.com/img/TNA30x-1.png"/> 
+<tr> <td colspan="6"> <br/> <img width="25px" src="https://tachyon-networks.com/img/TNA30x-small.png""/> 
   <br><b> TNA-30x Product family</b> (60GHz wireless)  <br/> <br/></td></tr>
 
 <tr> 
@@ -74,7 +74,15 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><b>Config Key Schema</b></td>
 <td><b>Notes </b></td>
 </tr>
+<tr> 
+<td>1.0.0</td>
+<td>Aug 30, 2023 </td>
+<td>v1.12.2+ </td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.0/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.0/keys.html">Config keys</a> </td>
+<td>Configuration routes are now supported. </td>
 
+</tr>
 <tr> 
 <td><1.0.0</td>
 <td>May. 30, 2023 </td>
