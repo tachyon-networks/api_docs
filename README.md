@@ -14,7 +14,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 ## API Specs
 
 <table>
-<tr> <td colspan="6"> <br/> <img width="20px" src="https://tachyon-networks.com/img/TNA30x-small.png"/> 
+<tr> <td colspan="6"> <br/> <img width="70px" src="https://tachyon-networks.com/img/github/tna_github.png"/> 
   <br><b> TNA-30x Product family</b> (60GHz wireless)  <br/> <br/></td></tr>
 
 <tr> 
@@ -24,6 +24,15 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><b>Swagger Docs</b></td>
 <td><b>Config Key Schema</b></td>
 <td><b>Notes </b></td>
+</tr>
+
+<tr> 
+<td>1.0.3 </td>
+<td>Dec 15, 2023 </td>
+<td>v1.11.3+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.3/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.3/keys.html">Config keys</a> </td>
+<td>New keys have been added to the config schema to support advanced time zones and TNA-303X antenna kits.  Antenna kit is also added to stats output. </td>
 </tr>
 
 <tr> 
