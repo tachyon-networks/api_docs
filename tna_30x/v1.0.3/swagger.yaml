@@ -1,7 +1,7 @@
 openapi: '3.0.2'
 info:
-  title: Tachyon Networks Public API v1.0.2
-  version: '1.0.2'
+  title: Tachyon Networks Public API v1.0.3
+  version: '1.0.3'
   description: Use this API to access information and configure your Tachyon Networks TNA-30x devices. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api" target="_new">here</a>.
 servers:
   - url: http://{deviceMgmtIp}/cgi.lua/apiv1
