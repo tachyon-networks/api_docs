@@ -83,6 +83,16 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><b>Config Key Schema</b></td>
 <td><b>Notes </b></td>
 </tr>
+
+<tr> 
+<td>1.0.1</td>
+<td>Jan 5, 2024 </td>
+<td>v1.12.3+ </td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.1/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.1/keys.html">Config keys</a> </td>
+<td>Config keys have been updated to support new max VLAN count of 128 and to add support for basic STP.</td>
+</tr>
+
 <tr> 
 <td>1.0.0</td>
 <td>Aug 30, 2023 </td>
@@ -90,8 +100,8 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.0/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.0/keys.html">Config keys</a> </td>
 <td>Configuration routes are now supported. </td>
-
 </tr>
+
 <tr> 
 <td><1.0.0</td>
 <td>May. 30, 2023 </td>
