@@ -27,6 +27,15 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 </tr>
 
 <tr> 
+<td>1.0.4 </td>
+<td>Jan 9, 2024 </td>
+<td>v1.11.4+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.4/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.4/keys.html">Config keys</a> </td>
+<td>New keys have been added to the config schema to support ptp mode, max fdb, & disable eth1 data. </td>
+</tr>
+
+<tr> 
 <td>1.0.3 </td>
 <td>Dec 15, 2023 </td>
 <td>v1.11.3+</td>
