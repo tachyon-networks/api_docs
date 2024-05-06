@@ -32,7 +32,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td>v1.12.0+</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.5/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.5/keys.html">Config keys</a> </td>
-<td>New keys have been added to the config schema to support alt. local IP, new antenna kits, & new DHCP option 82 settings. </td>
+<td>New keys have been added to the config schema to support alt. local IP, new antenna kits, RADIUS auth, & new DHCP option 82 settings. </td>
 </tr>
 
 <tr> 
