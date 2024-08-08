@@ -28,11 +28,11 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 
 <tr> 
 <td>1.0.5 </td>
-<td>May 17, 2024 </td>
+<td>May 17, 2024, (updated Aug 8) </td>
 <td>v1.12.0+</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.5/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.5/keys.html">Config keys</a> </td>
-<td>New keys have been added to the config schema to support alt. local IP, new antenna kits, RADIUS auth, & new DHCP option 82 settings. </td>
+<td>New keys have been added to the config schema to support alt. local IP, new antenna kits, RADIUS auth, new DHCP option 82 settings, and changes in mgmt VLAN settings. </td>
 </tr>
 
 <tr> 
@@ -101,6 +101,16 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><b>Config Key Schema</b></td>
 <td><b>Notes </b></td>
 </tr>
+
+<tr> 
+<td>1.0.2</td>
+<td>Aug 8, 2024 </td>
+<td>v1.12.5+ </td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.2/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tns_10x/v1.0.2/keys.html">Config keys</a> </td>
+<td>Config keys have been updated for changes in VLAN policies and support for new keys for RADIUS auth & adv. timezones settings. </td>
+</tr>
+
 
 <tr> 
 <td>1.0.1</td>
