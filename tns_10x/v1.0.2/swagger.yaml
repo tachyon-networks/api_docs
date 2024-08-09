@@ -1,0 +1,954 @@
+openapi: '3.0.2'
+info:
+  title: Tachyon Networks TNS-10x Public API v1.0.2
+  version: '1.0.2'
+  description: Use this API to access information and configure your Tachyon Networks TNS-100 devices, running firmware 1.12.5 and later.  This version applies to devices running firmware 1.12.3 and later unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tns-10x-restful-api" target="_new">here</a>.
+servers:
+  - url: http://{deviceMgmtIp}/cgi.lua/apiv1
+    variables:
+      deviceMgmtIp:
+        default: 192.168.2.1
+        description: Device's management IP address
+security:
+  - cookieAuth: []
+paths:
+  /login:
+    post:
+      description: Post login credentials to your device in order to authenticate your client.
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: 
+                  description: User's username
+                  type: string
+                  example: root
+                password:
+                  description: User's password
+                  type: string
+                  example: admin
+      responses: 
+        200:
+          description: Successful login response containing api token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  token:  
+                    type: string
+                    example: BCIHXGDDAAAAAAGVLFXNDYXRCCCJKGQFFA2F7BW2VPPN6===
+                    description: API token that will need to be included in subsequent API requests.
+                  level: 
+                    type: integer
+                    example: 0
+                    enum: [0,9]
+                    description: User access level.  0 = Admin, 9 = Read-only.
+                  auth: 
+                    type: boolean
+                    example: true
+                    description: Authorization status.
+        401:
+          description: Failed login response. 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+
+    delete:    
+      description: Logout of your API session.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API token representing the session you wish to delete.
+          required: true
+      responses:
+        200: 
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+  /reboot:
+    post:    
+      description: Reboot the device
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200: 
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+  /update:
+    get:
+      description: Get the current firmware task status details, if they exist.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200:
+          description: Response object containing details about the current firmware upgrade task. An empty object will be returned if no task exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    description: Status of the current firmware update task. 
+                    type: string
+                    enum: [FAIL, SUCCESS, IN_PROGRESS]
+                    example: FAIL
+                  state:
+                    description: Current state of the firmware update task. 
+                    type: string
+                    enum: [FIMRWARE_DOWNLOAD, FIRMWARE_FLASHING]
+                    example: FIMRWARE_DOWNLOAD
+                  last_changed:
+                    description: Timestamp of the last change to the firmware update task.
+                    type: integer
+                    example: 1621635010
+                  error: 
+                    description: Optional detailed error message in the case of the FAIL status.
+                    type: string
+                    example: "Unable to download file: curl(6) - Couldn't resolve host 'bad-firmware-url.com'"
+                  comment:
+                    description: Optional non-error comment/message regarding the task's current status.  This field is only populated after flashing is complete.
+                    type: string
+                    example: Reboot device for the new firmware to become active.
+                  URL: 
+                    description: Optional URL of the firmware provided by the user. Included for FIRMWARE_DOWNLOAD states.
+                    type: string
+                    example: https://bad-firmware.url
+              examples:
+                no-task: 
+                  value: 
+                    {}
+                bad-url: 
+                  value: 
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                download-success: 
+                  value: 
+                    {"status":"SUCCESS","url":"https://tachyon-networks.com/fw/tna-30x-1.11.1-r53981-20230426-tn-110-prs-squashfs-sysupgrade.bin","state":"FIRMWARE_DOWNLOAD","last_changed":1682628473}
+                download-failure: 
+                  value: 
+                    {"state":"FIRMWARE_DOWNLOAD","last_changed":1682628379,"status":"FAIL","url":"https://badurl.com","error":"Unable to download file: curl: (28) Failed to connect to badurl.com port 443: Operation timed out\n"}
+                flashing-in-progress:
+                  value:
+                    {"status":"IN_PROGRESS","last_changed":1682628956,"state":"FIRMWARE_FLASHING"}
+                flashing-complete:
+                  value:
+                    {"status":"COMPLETE","last_changed":1682628969,"comment":"Reboot device for the new firmware to become active.","state":"FIRMWARE_FLASHING"}
+                flashing-failure:
+                  value:
+                    {"status":"FAIL","url":"Invalid firmware upgrade: local firmware file is missing.","state":"FIRMWARE_FLASHING","last_changed":1682890699}
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples: 
+                invalid-url:
+                  value:
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}  
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+    put:
+      description: Instruct the device to asynchronously download a firmware file from the specified URL. 
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              required: [firmware_url]
+              type: object
+              properties:
+                firmware_url: 
+                  description: URL of firmware file.
+                  type: string
+                  example: https://tachyon-networks.com/firmware/tna-30x-1.11.0-upgrade-squashfs.bin
+      responses:
+        200: 
+          description: Success response returned after performing basic validation on the parameters. Use the GET /update route to fetch the actual download status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Description of the error.
+                    type: string
+                    example: Missing Firmware URL.
+    post:
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                reset: 
+                  description: (Optional) Whether or not the device should be reset to defaults after flashing is complete.
+                  type: boolean
+                  example: false 
+                  default: false  
+                force:
+                  description: (Optional) Whether or not the device should force flash the firmware image, even if it appears invalid.  Please contact support if you plan on using this field.
+                  type: boolean
+                  example: false 
+                  default: false 
+      description: Instruct the device to begin flashing the previously-downloaded firmware to the alternate bootbank, and optionally reset to defaults upon next bootup. This process will not affect the operation of the device - firmware will be updated only upon reboot.  The same goes for resetting to defaults. 
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200: 
+          description: Success response will be returned if firmware was successfully downloaded and validated, and flashing has begun.  Use the GET /update route to check on the status of the flashing process.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        400: 
+          description: Failure response for an invalid request, such as missing one or more parameters, or a missing firmware image.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                no-firmware-uploaded:
+                  value: {"statusCode":400,"error":{"details":"Invalid firmware upgrade: local firmware file is missing.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                bad-firmware-file:
+                  value: {"statusCode":400,"error":{"details":"Invalid firmware file: local firmware file didn't pass validation.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /stats:
+    get:
+      description: Fetch system, ethernet, interface and/or network statistics from the device.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+        - in: query
+          name: type
+          schema:
+            type: string
+            example: system,ethernet
+          description: "Type of stats to fetch: system, ethernet, interfaces, and/or network (multiple types can be specified in a comma-seperated list)."
+          required: true
+      responses: 
+        200:
+          description: JSON object containing the requested stats. See output examples below.  These should roughly match up to what's shown in the web UI dashboard.  Note - in firmware v1.10.3 (earliest fw), the system stats response will NOT contain the firmware version field.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                interface-stats:
+                  value:
+                    {"interfaces":{"eth2":{"rx_bytes":0,"disabled":false,"mtu":9018,"if_index":11,"routes":[],"tx_packets":61583,"rx_packets":0,"ip6_address":["fe80::7a5e:e8ff:fed0:3/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"","poe_out":false},"tx_bytes":5397316,"mac_address":"78:5E:E8:D0:00:03","rx_errors":0},"eth4":{"rx_bytes":0,"disabled":false,"mtu":9018,"if_index":9,"routes":[],"tx_packets":61585,"rx_packets":0,"ip6_address":["fe80::7a5e:e8ff:fed0:5/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"","poe_out":false},"tx_bytes":5397448,"mac_address":"78:5E:E8:D0:00:05","rx_errors":0},"eth3":{"rx_bytes":0,"disabled":false,"mtu":9018,"if_index":10,"routes":[],"tx_packets":61585,"rx_packets":0,"ip6_address":["fe80::7a5e:e8ff:fed0:4/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"","poe_out":false},"tx_bytes":5397448,"mac_address":"78:5E:E8:D0:00:04","rx_errors":0},"lo":{"rx_bytes":7588,"tx_drop":0,"tx_bytes":7588,"mtu":65536,"if_index":1,"ip_address":["127.0.0.1/8"],"mac_address":"00:00:00:00:00:00","disabled":false,"rx_errors":0,"tx_packets":115,"routes":[],"rx_packets":115,"tx_errors":0,"ip6_address":["::1/128"],"routes6":[],"rx_drop":0},"eth5":{"rx_bytes":5702710871,"disabled":false,"mtu":9018,"if_index":8,"routes":[],"tx_packets":4756618,"rx_packets":5295543,"ip6_address":["fe80::7a5e:e8ff:fed0:6/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":1,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":""},"tx_bytes":6359992414,"mac_address":"78:5E:E8:D0:00:06","rx_errors":0},"br-wan":{"rx_bytes":5455106601,"disabled":false,"mtu":1500,"if_index":18,"routes":["192.168.99.0/24"],"tx_packets":788512,"rx_packets":2244744,"ip6_address":["2600:8807:93e0:1000:7a5e:e8ff:fed0:1/64","fe80::7a5e:e8ff:fed0:1/64"],"routes6":["2600:8807:93e0:1000::/64","fe80::/64"],"tx_drop":0,"rx_drop":93608,"wrap":"wan","mac_address":"78:5E:E8:D0:00:01","ip_address":["192.168.99.63/24"],"rx_errors":0,"gateway":"192.168.99.1","tx_errors":0,"tx_bytes":6097292156,"gateway6":"fe80::de2c:6eff:fe44:947"},"eth0":{"rx_bytes":586330,"disabled":false,"mtu":9018,"if_index":13,"routes":[],"tx_packets":463303,"rx_packets":4237,"ip6_address":["fe80::7a5e:e8ff:fed0:1/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":""},"tx_bytes":54047436,"mac_address":"78:5E:E8:D0:00:01","rx_errors":0},"eth1":{"rx_bytes":125885865,"disabled":false,"mtu":9018,"if_index":12,"routes":[],"tx_packets":608852,"rx_packets":123328,"ip6_address":["fe80::7a5e:e8ff:fed0:2/64"],"routes6":["fe80::/64"],"tx_drop":0,"type":"wired","rx_drop":0,"tx_errors":0,"ip_address":[],"zone":"wan","options":{"desc":"TNS-301 99.48","poe_out":true},"tx_bytes":67070286,"mac_address":"78:5E:E8:D0:00:02","rx_errors":0}}}
+                ethernet-stats:
+                  value: 
+                    {
+                    "ethernet": {
+                      "ports": {
+                        "eth2": {
+                          "mac": "78:5E:E8:D0:00:13",
+                          "poe_out": false,
+                          "name": "eth2",
+                          "link": true,
+                          "speed": 2500,
+                          "autoneg": true,
+                          "duplex": "full",
+                          "desc": ""
+                        },
+                        "eth4": {
+                          "mac": "78:5E:E8:D0:00:15",
+                          "name": "eth4",
+                          "link": false,
+                          "autoneg": true,
+                          "poe_out": true,
+                          "desc": "TNA-302 STA: John Doe"
+                        },
+                        "eth3": {
+                          "mac": "78:5E:E8:D0:00:14",
+                          "name": "eth3",
+                          "link": false,
+                          "autoneg": true,
+                          "poe_out": false,
+                          "desc": ""
+                        },
+                        "eth5": {
+                          "mac": "78:5E:E8:D0:00:16",
+                          "name": "eth5",
+                          "link": true,
+                          "speed": 10000,
+                          "autoneg": false,
+                          "duplex": "full",
+                          "desc": ""
+                        },
+                        "eth0": {
+                          "mac": "78:5E:E8:D0:00:11",
+                          "name": "eth0",
+                          "link": true,
+                          "speed": 2500,
+                          "autoneg": true,
+                          "duplex": "full",
+                          "desc": ""
+                        },
+                        "eth1": {
+                          "mac": "78:5E:E8:D0:00:12",
+                          "poe_out": false,
+                          "name": "eth1",
+                          "link": true,
+                          "speed": 2500,
+                          "autoneg": true,
+                          "duplex": "full",
+                          "desc": ""
+                        }
+                      },
+                      "sfp": {
+                        "brand": "FS",
+                        "diagnostics_support": "No",
+                        "sku": "SFP-10GLRM-31",
+                        "serial": "F2140164236"
+                      }
+                    }
+                  }
+                system-stats:
+                  value:
+                    {
+                    "system": {
+                      "epoch_time": 1684431063,
+                      "fw_version": "1.12.0 rev 55325",
+                      "serial_no": "TNS100ABCDEFH",
+                      "cpu_usage_percent": 0,
+                        "bootbanks": {
+                          "backup": {
+                            "version": "1.12.0 rev 55342",
+                            "bootbank": 1
+                          },
+                          "active": {
+                            "version": "1.12.0 rev 55344",
+                            "bootbank": 2
+                          }
+                        },
+                      "memory": {
+                        "used": 119246848,
+                        "usage": 31,
+                        "total": 389386240,
+                        "free": 270139392
+                      },
+                      "name": "TNS-100",
+                      "model": "TNS-100",
+                      "location": "Main office - cube 2",
+                      "hostname": "tachyon-networks-tns-100",
+                      "clock_datetime": "2023/05/18 12:31:03",
+                      "cpu_temp": 52
+                    }
+                  }
+                network-stats-with-default-mgmt-vlan:
+                  value:
+                    {
+                    "network": {
+                      "zones": {
+                        "wan": {
+                          "mgmt": {
+                            "mac": "78:5E:E8:D0:00:01",
+                            "ipv6": {
+                              "ip_address": [
+                                "2600:8807:93e0:1000:7a5e:e8ff:fed0:1/64",
+                                "fe80::7a5e:e8ff:fed0:1/64"
+                              ],
+                              "gateway": "fe80::de2c:6eff:fe44:947"
+                            },
+                            "mtu": 1500,
+                            "vlan_id": 1,
+                            "ipv4": {
+                              "ip_address": [
+                                "192.168.99.63/24"
+                              ],
+                              "gateway": "192.168.99.1"
+                            },
+                            "interface": "br-wan"
+                          }
+                        }
+                      },
+                      "dns": {
+                        "dhcp.br-wan": [
+                          "1.1.1.1",
+                          "8.8.8.8"
+                        ]
+                      },
+                      "hostname": "tns-100",
+                      "dhcp_status": {
+                        "br-wan": [
+                          [
+                            {
+                              "discovery": true,
+                              "lease_server": "192.168.99.1",
+                              "fallback": {
+                                "prefix": 24,
+                                "ip": "192.168.1.1"
+                              },
+                              "custom_dns": false,
+                              "ip": "192.168.99.63",
+                              "status": "renew",
+                              "prefix": 24,
+                              "metric": 0,
+                              "gateway": "192.168.99.1",
+                              "lease_acquired": 1684588484,
+                              "dns": [
+                                "1.1.1.1",
+                                "8.8.8.8"
+                              ],
+                              "lease_lifetime": 600
+                            }
+                          ]
+                        ]
+                      },
+                      "dns6": {
+                        "dhcp.br-wan": {}
+                      }
+                    }
+                  }
+                network-stats-non-native-mgmt-vlan:
+                  value: 
+                    {
+                    "network": {
+                      "zones": {
+                        "wan": {
+                          "mgmt": {
+                            "mac": "78:5E:E8:D0:00:11",
+                            "ipv6": {
+                              "ip_address": [
+                                "fe80::7a5e:e8ff:fed0:11/64"
+                              ]
+                            },
+                            "mtu": 1501,
+                            "vlan_id": 106,
+                            "ipv4": {
+                              "ip_address": [
+                                "192.168.201.159/24"
+                              ],
+                              "gateway": "192.168.201.1"
+                            },
+                            "interface": "br-wan.106"
+                          }
+                        }
+                      },
+                      "dns": {
+                        "dhcp.br-wan.106": [
+                          "8.8.8.8"
+                        ]
+                      },
+                      "hostname": "tachyon-networks-tns-100",
+                      "dhcp_status": {
+                        "br-wan.106": [
+                          [
+                            {
+                              "discovery": true,
+                              "lease_server": "192.168.201.1",
+                              "fallback": {
+                                "prefix": 24,
+                                "ip": "192.168.2.1"
+                              },
+                              "custom_dns": false,
+                              "ip": "192.168.201.159",
+                              "metric": 0,
+                              "prefix": 24,
+                              "status": "renew",
+                              "gateway": "192.168.201.1",
+                              "lease_acquired": 1684588664,
+                              "dns": [
+                                "8.8.8.8"
+                              ],
+                              "lease_lifetime": 600
+                            }
+                          ]
+                        ]
+                      },
+                      "dns6": {
+                        "dhcp.br-wan.106": {}
+                      }
+                    }
+                  }
+                network-stats-static-ip:
+                  value: 
+                    {"network":{"zones":{"wan":{"mgmt":{"mac":"78:5E:E8:D0:00:01","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:1/64"]},"mtu":1500,"vlan_id":1,"ipv4":{"ip_address":["192.168.99.178/24"],"gateway":"192.168.99.1"},"interface":"br-wan"}}},"dns":{"wan":["1.1.1.1","8.8.8.8"]},"hostname":"tns-100","dhcp_status":{},"dns6":{"wan":{}}}}
+  /poe_reset:   
+    post:
+        description: Power cycle a PoE-out port on the TNS.
+        parameters:
+          - in: cookie
+            name: api_token
+            schema:
+              type: string
+            description: API auth token.
+            required: true
+        requestBody:
+          content: 
+            application/json:
+              schema:
+                required: [port]
+                type: object
+                properties:
+                  port: 
+                    description: Name of interface to powercycle (eth1, eth2, etc...)
+                    type: string
+                    example: eth2
+      
+        responses: 
+          400:
+            description: Failure response for an invalid request, such as missing one or more parameters.
+            content:
+              application/json:
+                schema:
+                  type: object
+                examples: 
+                  missing-port:
+                    value:
+                      {"statusCode":400,"error":{"details":"Port not provided","path":"/cgi.lua/apiv1/poe_reset"},"description":"Bad Request"}  
+                  bad-port-name:
+                    value:
+                      {"statusCode":400,"error":{"details":"Port not valid","path":"/cgi.lua/apiv1/poe_reset"},"description":"Bad Request"}
+                  not-poe-port:
+                    value:
+                      {"statusCode":400,"error":{"details":"Port does not support PoE out","path":"/cgi.lua/apiv1/poe_reset"},"description":"Bad Request"}
+          401:
+            description: Unauthorized.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/GenericFailureReponse'
+    
+          200:
+            description: Ok status response.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/GenericSuccessReponse'        
+  /bridge_table:
+    get:
+      description: Get the output of the bridge table.
+      responses: 
+        200:
+          description: JSON object containing this device's bridge table entries.  The value for the bridge_table field will be an empty object {} when there are no entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  bridge_table:  
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        mac:
+                          description: MAC address of the bridge table entry.
+                          type: string
+                          example: 78:28:ca:32:3c:08
+                        bridge: 
+                          description: The name of the bridge interface containing this MAC.
+                          type: string
+                          example: br-wan
+                        iface:
+                          description: The interface behind which this MAC address lives. 
+                          type: string
+                          example: eth0
+              examples:
+                bridge-table: 
+                  value:
+                    {
+                    "bridge_table": [
+                      {
+                        "mac": "44:07:0b:63:8d:11",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:d0:01:2a",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "44:61:32:7a:02:41",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "94:9f:3e:03:01:ec",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:00:05:b8",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "1c:57:dc:2f:31:5b",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "94:9f:3e:03:0a:f4",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:b5:8f:ed",
+                        "bridge": "99",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "dc:2c:6e:44:09:47",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:d0:00:22",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "94:9f:3e:7c:9b:aa",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "1c:57:dc:7e:99:99",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "64:d2:c4:a6:67:ad",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "cc:40:d0:02:96:9f",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "04:5d:4b:2c:10:b5",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "3c:8c:f8:fd:9d:ed",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "24:5e:be:66:63:32",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:6f:bb:4e",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "0c:62:a6:98:b9:21",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:b5:8f:ed",
+                        "bridge": "106",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "00:0c:29:3b:d0:b4",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      },
+                      {
+                        "mac": "78:5e:e8:00:00:03",
+                        "bridge": "1",
+                        "iface": "eth5"
+                      }
+                    ]
+                  }
+                empty:
+                  value: {"bridge_table":{}}
+
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              example:
+                unauth:
+                  {
+                  "statusCode": 401,
+                  "description": "Unauthorized",
+                  "error": {
+                    "details": "Authorization Failed",
+                    "path": "/cgi.lua/apiv1/bridge_table"
+                  }
+                }
+  /config:
+    get:
+      description: Get the device's current configuration.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+      responses:
+        200:
+          description: JSON object containing the device's current configuration.  
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"config":{"interfaces":{"ports":{"eth2":{"enabled":true,"description":"Back up TNA 302 AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth4":{"enabled":true,"description":"TNA 301 Demo AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth3":{"enabled":true,"description":"UBNT 5Ghz radio","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth5":{"enabled":true,"description":"","isolation_rules":[],"vlans":{"management":true,"trunk":[99,106],"access":[]},"enable_sfp_1g_support":false},"eth0":{"enabled":true,"vlans":{"management":true,"trunk":[99,106],"access":[]},"description":"","isolation_rules":[]},"eth1":{"enabled":true,"description":"","isolation_rules":[],"poe_out":false,"vlans":{"management":true,"trunk":[99,106],"access":[]}}},"port_mtu":9018,"stp": { "enabled": false}},"system":{"device_name":"Tachyon Networks TNS-100","reset_button":{"enabled":true},"hostname":"tns-100","users":[{"username":"root","type":"admin","password_hash":"$1$6Hzch.yD$ULugJ982Yb1D0g8zhqv3T.","enabled":true}],"device_location":"office closet","device_description":"Dev switch in office closet","timezone":"America/Los_Angeles"},"network":{"wan":{"management":{"vlan_id":1},"ipv6":{"enabled":false},"mtu":1500,"ipv4":{"enabled":true,"prefix":24,"ipaddr":"192.168.1.1"},"vlans":[{"vlan_id":1,"label":"Management"}],"ip_mode":"dhcp"}},"services":{"snmp":{"v2":{"enabled":true,"community":"public"},"v3":{"enabled":false}},"ping_watchdog":{"enabled":false},"http":{"https_port":443,"port":80},"remote_syslog":{"enabled":false},"snmp_traps":{"enabled":false},"discovery":{"enabled":true,"broadcast_protocols":{"lldp":true,"cdp":true,"mndp":true},"lldp_server":{"enabled":true}},"ntp":{"enabled":true,"servers":["time.cloudflare.com","time.google.com"]}}}}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              example:
+                unauth:
+                  {
+                  "statusCode": 401,
+                  "description": "Unauthorized",
+                  "error": {
+                    "details": "Authorization Failed",
+                    "path": "/cgi.lua/apiv1/config"
+                  }
+                }
+        500:
+          description: JSON object containing error information in the event that a system or fatal error occurs while fetching the config.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              example:
+                unauth:
+                  {
+                  "statusCode": 500,
+                  "description": "Internal Server Error",
+                  "error": {
+                    "details": "System error - internal conversion failed: (internal error detail here)",
+                    "path": "/cgi.lua/apiv1/config"
+                  }
+                }
+    post:
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                dry_run: 
+                  description: Whether or not this should be a dry run - meaning the device's configuration will not be affected.  Set this flag if you wish to check for any errors or to view the list of changed keys before making any real changes.
+                  type: boolean
+                  example: false
+                config:
+                  description: The JSON object representing this device's configuration. Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+                  type: object
+                  example: {"config":{"interfaces":{"ports":{"eth2":{"enabled":true,"description":"Back up TNA 302 AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth4":{"enabled":true,"description":"TNA 301 Demo AP","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth3":{"enabled":true,"description":"UBNT 5Ghz radio","isolation_rules":[],"poe_out":true,"vlans":{"management":true,"trunk":[99,106],"access":[]}},"eth5":{"enabled":true,"description":"","isolation_rules":[],"vlans":{"management":true,"trunk":[99,106],"access":[55]},"enable_sfp_1g_support":false},"eth0":{"enabled":true,"vlans":{"management":true,"trunk":[99,106],"access":[]},"description":"","isolation_rules":[]},"eth1":{"enabled":true,"description":"","isolation_rules":[],"poe_out":false,"vlans":{"management":true,"trunk":[99,106],"access":[]}}},"port_mtu":9018,"stp": { "enabled": true}},"system":{"device_name":"Tachyon Networks TNS-100","reset_button":{"enabled":true},"hostname":"tns-100","users":[{"username":"root","type":"admin","password_hash":"$1$6Hzch.yD$ULugJ982Yb1D0g8zhqv3T.","enabled":true}],"device_location":"office closet","device_description":"new value","timezone":"America/Los_Angeles"},"network":{"wan":{"management":{"vlan_id":1},"ipv6":{"enabled":false},"mtu":1500,"ipv4":{"enabled":true,"prefix":24,"ipaddr":"192.168.1.1"},"vlans":[{"vlan_id":1,"label":"Management"}],"ip_mode":"dhcp"}},"services":{"snmp":{"v2":{"enabled":true,"community":"public"},"v3":{"enabled":false}},"ping_watchdog":{"enabled":false},"http":{"https_port":443,"port":80},"remote_syslog":{"enabled":false},"snmp_traps":{"enabled":false},"discovery":{"enabled":true,"broadcast_protocols":{"lldp":true,"cdp":true,"mndp":true},"lldp_server":{"enabled":true}},"ntp":{"enabled":true,"servers":["time.cloudflare.com","time.google.com"]}}}}
+      description: Update the device's configuration and restart networking services, or perform a dry run.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+      responses:
+        200:
+          description: JSON object containing the information related to a successful configuration update operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_message:
+                      description: Detailed status message.
+                      example: Configuration saved, applying changes now.
+                      type: string
+                  response:
+                      description: JSON object containing information about the config update operation.
+                      type: object 
+                      properties: 
+                        reboot_required: 
+                          type: boolean
+                          example: false
+                          description: Whether or not a reboot is required to apply these changes.
+                        warnings:
+                          description: JSON object containing config key warnings. 
+                          type: object
+                        keys_added:
+                          type: object
+                          description: JSON object containing new config keys. 
+                        keys_removed:
+                          type: object
+                          description: JSON object containing removed config keys. 
+                        keys_changed:
+                          type: object
+                          description: JSON object containing changed config keys. 
+                          
+              examples:
+                config-change-add-vlans:
+                config-change-add-isolation-rules:
+                config-change-add-user: 
+                  value:
+                    status_message: Configuration saved, applying changes now.
+                    response:
+                      reboot_required: false
+                      keys_removed: {}
+                      keys_added: {"system.users.4":{"username":"guest1","type":"read-only","password_hash":"$1$ohSsj1Ga$xF6ruORwRp1TNYmUjRgQn0", "enabled":true}}
+                      keys_changed: {}
+                      warnings: {}
+                      
+        500: 
+          description: JSON object containing error information in the event that a system or fatal error occurs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  statusCode: 
+                    description: Error status code matching HTTP status code.
+                    type: integer
+                    example: 500
+                  description:
+                    description: Short description of the error.
+                    example: Internal Server Error
+                    type: string
+                  error: 
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: "System error - failed to run config validation: (internal error detail here)"
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/config
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters, or for passing an invalid config JSON object. For an invalid config, only the first error is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Short description of the error.
+                    example: Bad Request
+                    type: string
+                  error: 
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: Missing config in POST data.
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/config
+              examples:
+                invalid-config-key: 
+                  value:
+                    statusCode: 400
+                    description: "Bad Request"
+                    error:
+                      details: "Configuration validation failed: The key interfaces.ports.eth2.poe_out is required but not included in the input."
+                      path: "/cgi.lua/apiv1/config"
+     
+components:
+  securitySchemes:
+    cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
+      type: apiKey
+      in: cookie
+      name: api_token
+  schemas:
+    GenericSuccessReponse:
+      type: object
+      properties:
+        status:
+          description: Status of the response. 
+          type: string
+          example: ok
+    GenericFailureReponse:
+      type: object
+      properties: 
+        statusCode: 
+          description: Error status code matching HTTP status code.
+          type: integer
+          example: 401
+        description:
+          description: Short description of the error.
+          example: Unauthorized
+          type: string
+        error: 
+          type: object
+          properties:
+            details:
+              description: Detailed error message.
+              type: string
+              example: Authorization Failed
+            path:
+              type: string
+              description: Route where this error occurred.
+              example: /cgi.lua/apiv1/stats
+
+      
