@@ -27,6 +27,15 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 </tr>
 
 <tr> 
+<td>1.0.6 </td>
+<td>Jan 17, 2025 </td>
+<td>v1.12.1+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.6/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.6/keys.html">Config keys</a> </td>
+<td>New keys have been added to the config schema to support changes in data VLAN protcols, updated failover thresholds, SNMP uptime settings, HTTP server controls, and signal LED controls. Wireless peer ipv4, ipv6, and target RSSI has been added to wireless stats output; device uptime has been added to system stats.</td>
+</tr>
+
+<tr> 
 <td>1.0.5 </td>
 <td>May 17, 2024, (updated Aug 8) </td>
 <td>v1.12.0+</td>
