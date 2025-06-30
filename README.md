@@ -27,6 +27,15 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 </tr>
 
 <tr> 
+<td>1.0.7 </td>
+<td>Jun 30, 2025 </td>
+<td>v1.12.2+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.7/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.7/keys.html">Config keys</a> </td>
+<td>New keys have been added to the config schema to support the TNA-303L-65 2.4 management radio.  Radio name was also added to the wireless peer stats output. </td>
+</tr>
+
+<tr> 
 <td>1.0.6 </td>
 <td>Jan 17, 2025 </td>
 <td>v1.12.1+</td>
