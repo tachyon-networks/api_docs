@@ -391,7 +391,8 @@ paths:
                             "rx_rate": 385,
                             "est_link_distance": 10,
                             "antenna_kit": "none",
-                            "model": "TNA-302"
+                            "model": "TNA-302",
+                            "radio_name": "wlan0"
                           }
                         ],
                         "histogram_updated_at": 1672898129,
