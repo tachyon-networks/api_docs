@@ -302,7 +302,7 @@ paths:
                         "peers": [
                           {
                             "system_name": "Tachyon 303X demo client",
-                            "system_description": "Tachyon Networks TNA-303X+AK100: v1.11.2 r54120",
+                            "system_desc": "Tachyon Networks TNA-303X+AK100: v1.11.2 r54120",
                             "rx_bytes": 3054236,
                             "rx_sector": 32,
                             "snr": 16,
@@ -348,7 +348,7 @@ paths:
                           },
                           {
                             "system_name": "Tachyon 302 lab client",
-                            "system_description": "Tachyon Networks TNA-302: v1.11.2 r54120",
+                            "system_desc": "Tachyon Networks TNA-302: v1.11.2 r54120",
                             "rx_bytes": 3058100,
                             "rx_sector": 32,
                             "snr": 12,
@@ -398,6 +398,7 @@ paths:
                           "wlan0": {
                             "antenna_kit": "none",
                             "channel_width": 2160,
+                            "boresight_lock": false,
                             "op_mode": "master",
                             "ptp": false,
                             "ssid": "boring-ssid-name",

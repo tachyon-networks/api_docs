@@ -302,7 +302,8 @@ paths:
                         "peers": [
                           {
                             "system_name": "Tachyon 303X demo client",
-                            "system_description": "Tachyon Networks TNA-303X+AK100: v1.11.2 r54120",
+                            "system_desc": "Tachyon Networks TNA-303X+AK100: v1.12.2 r54903",
+                            "fw": "1.12.2.r54903",
                             "rx_bytes": 3054236,
                             "rx_sector": 32,
                             "snr": 16,
@@ -345,11 +346,13 @@ paths:
                             "est_link_distance": 11,
                             "antenna_kit": "ak+100",
                             "model": "TNA-303X",
-                            "radio_name": "wlan0"
+                            "radio_name": "wlan0",
+                            "target_rssi": -56
                           },
                           {
                             "system_name": "Tachyon 302 lab client",
-                            "system_description": "Tachyon Networks TNA-302: v1.11.2 r54120",
+                            "system_desc": "Tachyon Networks TNA-302: v1.12.2 r54903",
+                            "fw": "1.12.2.r54903",
                             "rx_bytes": 3058100,
                             "rx_sector": 32,
                             "snr": 12,
@@ -392,7 +395,8 @@ paths:
                             "est_link_distance": 10,
                             "antenna_kit": "none",
                             "model": "TNA-302",
-                            "radio_name": "wlan0"
+                            "radio_name": "wlan0",
+                            "target_rssi": -45
                           }
                         ],
                         "histogram_updated_at": 1672898129,
@@ -400,6 +404,7 @@ paths:
                           "wlan0": {
                             "antenna_kit": "none",
                             "channel_width": 2160,
+                            "boresight_lock": false,
                             "op_mode": "master",
                             "ptp": false,
                             "ssid": "boring-ssid-name",
@@ -408,29 +413,42 @@ paths:
                             "modem_temp": 50,
                             "name": "wlan0",
                             "channel": 6,
-                            "tx_power": 40,
                             "mac": "78:5E:E8:D0:FF:F3",
                             "security": "WPA2-PSK (GCMP)"
                           }
                         }
                       }
                     }
-                ethernet-stats:
+                ethernet-stats-multi-port:
                   value: 
-                    {"ethernet":{"ports":{"eth0":{"rx_bytes":1299436,"tx_bytes":4841326,"link":true,"autoneg":true,"port":4,"tx_error":0,"rx_packets":7758,"speed":2500,"rx_error":0,"tx_packets":4631,"duplex":"full"},"eth1":{"rx_bytes":0,"tx_bytes":1088289,"link":false,"autoneg":true,"tx_packets":5964,"rx_packets":0,"tx_error":0,"poe_out":true,"port":3,"rx_error":0}},"switch_mac":"78:5E:E8:D0:FF:F1"}}
+                    {"ethernet":{"ports":{"eth0":{"rx_bytes":1299436,"tx_bytes":4841326,"link":true,"autoneg":true,"port":4,"tx_error":0,"rx_packets":7758,"speed":2500,"rx_error":0,"tx_packets":4631,"duplex":"full"},"eth1":{"rx_bytes":0,"tx_bytes":1088289,"data_disabled": false, "link":false,"autoneg":true,"tx_packets":5964,"rx_packets":0,"tx_error":0,"poe_out":true,"port":3,"rx_error":0}},"switch_mac":"78:5E:E8:D0:FF:F1"}}
+                ethernet-stats-303L:
+                  value: 
+                    {
+                      "ethernet": {
+                        "ports": {
+                          "eth0": {
+                            "mac": "78:5E:E8:D0:11:01",
+                            "autoneg": true,
+                            "name": "eth0",
+                            "link": false
+                          }
+                        }
+                      }
+                    }
                 system-stats:
                   value:
                     {"system":{
                     "bootbanks": {
                     "backup": {
-        "bootbank": 1,
-        "version": "1.11.2 rev 54120"
-      },
-      "active": {
-        "bootbank": 2,
-        "version": "1.11.2 rev 54128"
-      }
-    },"epoch_time":1672872740,"fw_version":"1.11.2 rev 54120","serial_no":"TNA30100036B10","cpu_usage_percent":0,"memory":{"used":133083136,"usage":32,"total":419270656,"free":286187520},"name":"Tachyon Networks PtMP","model":"TNA-301","location":"A/V Closet","hostname":"tachyon-ptmp-ap","clock_datetime":"2023/01/04 14:52:20","cpu_temp":47}}
+                      "bootbank": 1,
+                      "version": "1.11.2 rev 54120"
+                      },
+                      "active": {
+                      "bootbank": 2,
+                      "version": "1.12.1 rev 54920"
+                      }
+                    },"epoch_time":1672872740,"uptime": 82342, "fw_version":"1.12.2 rev 54920", "description": "", "serial_no":"TNA30100036B10","cpu_usage_percent":0,"memory":{"used":133083136,"usage":32,"total":419270656,"free":286187520},"name":"Tachyon Networks PtMP","model":"TNA-301","location":"A/V Closet","hostname":"tachyon-ptmp-ap","clock_datetime":"2023/01/04 14:52:20","cpu_temp":47}}
                 network-stats:
                   value:
                     {"network":{"zones":{"wan":{"mgmt_vlan":{"enabled":false},"data_bridge":{"mac":"78:5E:E8:D0:FF:F1","ipv6":{"ip_address":["fe80::7a5e:e8ff:fed0:fff1/64"]},"data_vlan":{"enabled":false},"ipv4":{"ip_address":["192.168.99.48/24"],"gateway":"192.168.99.1"},"interface":"br-wan"}}},"dns":{"wan":["1.1.1.1","1.0.0.1"],"dhcp.br-wan":["1.1.1.1","8.8.8.8"]},"hostname":"tachyon-ptmp-ap","dhcp_status":{"br-wan":[[{"discovery":true,"lease_server":"192.168.99.1","fallback":{"prefix":24,"ip":"192.168.1.1"},"custom_dns":true,"ip":"192.168.99.48","prefix":24,"gateway":"192.168.99.1","metric":0,"lease_acquired":1672872614,"status":"renew","lease_lifetime":600}]]},"dns6":{"wan":{},"dhcp.br-wan":{}}}}

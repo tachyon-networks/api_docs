@@ -2,7 +2,7 @@ openapi: '3.0.2'
 info:
   title: Tachyon Networks TNS-10x Public API v1.0.1
   version: '1.0.1'
-  description: Use this API to access information and configure your Tachyon Networks TNS-100 devices.  This version applies to devices running firmware 1.12.3 and later unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tns-10x-restful-api" target="_new">here</a>.
+  description: Use this API to access information and configure your Tachyon Networks TNS-100 devices.  This version applies to devices running firmware 1.12.3-1.12.4 unless otherwise noted. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tns-10x-restful-api" target="_new">here</a>.
 servers:
   - url: http://{deviceMgmtIp}/cgi.lua/apiv1
     variables:
