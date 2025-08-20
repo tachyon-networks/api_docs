@@ -38,7 +38,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <tr> 
 <td>1.0.6 </td>
 <td>Jan 17, 2025 </td>
-<td>v1.12.1+</td>
+<td>v1.12.1</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.6/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.6/keys.html">Config keys</a> </td>
 <td>New keys have been added to the config schema to support changes in data VLAN protcols, updated failover thresholds, SNMP uptime settings, HTTP server controls, and signal LED controls. Wireless peer ipv4, ipv6, and target RSSI has been added to wireless stats output; device uptime has been added to system stats.</td>
@@ -47,16 +47,16 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <tr> 
 <td>1.0.5 </td>
 <td>May 17, 2024, (updated Aug 8) </td>
-<td>v1.12.0+</td>
+<td>v1.12.0</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.5/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.5/keys.html">Config keys</a> </td>
-<td>New keys have been added to the config schema to support alt. local IP, new antenna kits, RADIUS auth, new DHCP option 82 settings, and changes in mgmt VLAN settings. </td>
+<td>New keys have been added to the config schema to support alt. local IP, new antenna kits, boresight lock,  RADIUS auth, new DHCP option 82 settings, and changes in mgmt VLAN settings. </td>
 </tr>
 
 <tr> 
 <td>1.0.4 </td>
 <td>Jan 9, 2024 </td>
-<td>v1.11.4+</td>
+<td>v1.11.4</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.4/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.4/keys.html">Config keys</a> </td>
 <td>New keys have been added to the config schema to support ptp mode, max fdb, & disable eth1 data. </td>
@@ -65,7 +65,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <tr> 
 <td>1.0.3 </td>
 <td>Dec 15, 2023 </td>
-<td>v1.11.3+</td>
+<td>v1.11.3</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.3/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.3/keys.html">Config keys</a> </td>
 <td>New keys have been added to the config schema to support advanced time zones and TNA-303X antenna kits.  Antenna kit is also added to stats output. </td>
@@ -74,7 +74,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <tr> 
 <td>1.0.2 </td>
 <td>July 9, 2023 </td>
-<td>v1.11.2+</td>
+<td>v1.11.2</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.2/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.2/keys.html">Config keys</a> </td>
 <td>New keys have been added to the config schema to support failover and station SSID profiles.  The output of some of the stats has been expanded upon (discovery/device info added to wireless peers, and bootbank firmware versions added to system stats). </td>
@@ -83,7 +83,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <tr> 
 <td>1.0.1 </td>
 <td>Mar. 13, 2023 </td>
-<td>v1.11.1+</td>
+<td>v1.11.1</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.0/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.1/keys.html">Config keys</a> </td>
 <td> New configuration keys have been added to the config schema to support traffic shaping. </td>
