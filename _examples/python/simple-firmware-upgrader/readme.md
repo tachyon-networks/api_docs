@@ -8,7 +8,7 @@ Notes:
 
 ## Example: 
 
-`$> ./firmware_upgrade.py  --ip 192.168.99.133 --username XXXXX --password XXXXX --url http://tachyon-networks.com/fw/tna-30x/1.12.3/tna-30x-1.12.3-r54999-20260204-tn-110-prs-squashfs-sysupgrade.bin`
+`$> ./firmware_upgrade.py  --ip 192.168.99.133 --username XXXXX --password XXXXX --url  http://tachyon-networks.com/fw/tna-30x/1.12.3/tna-30x-1.12.3-r55000-20260206-tn-110-prs-squashfs-sysupgrade.bin`
 
 
 ```
@@ -57,7 +57,7 @@ Fetching current firmware version...
 
 ## Example: with --force
 
-`$> ./firmware_upgrade.py  --ip 192.168.99.133 --username XXXXX --password XXXXX --url http://tachyon-networks.com/fw/tna-30x/1.12.3/tna-30x-1.12.3-r54999-20260204-tn-110-prs-squashfs-sysupgrade.bin --force`
+`$> ./firmware_upgrade.py  --ip 192.168.99.133 --username XXXXX --password XXXXX --url http://tachyon-networks.com/fw/tna-30x/1.12.3/tna-30x-1.12.3-r55000-20260206-tn-110-prs-squashfs-sysupgrade.bin --force`
 
 
 ```============================================================
