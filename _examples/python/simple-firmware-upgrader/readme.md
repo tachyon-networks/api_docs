@@ -21,11 +21,11 @@ Logging in to 192.168.99.133...
 Fetching device information...
   Device model: n/a
   Current firmware (active bootbank):   1.12.3 rev 54970
-  Alternate firmware (backup bootbank):	1.12.3 rev 54999
+  Alternate firmware (backup bootbank):	1.12.3 rev 55000
 
 Version comparison:
   Current: 1.12.3-r54970
-  New:     1.12.3-r54999
+  New:     1.12.3-r55000
 ✓ Upgrade available - proceeding with upgrade
 
 Sending firmware URL to device...
@@ -50,9 +50,9 @@ Logging in to 192.168.99.133...
 ✓ Login successful
 Fetching current firmware version...
   Device model: TNA-301
-  Current firmware (active bootbank):	1.12.3 rev 54999
-  Alternate firmware (backup bootbank):	1.12.3 rev 54999
-✓ Upgrade complete. New firmware version: 1.12.3 rev 54999```
+  Current firmware (active bootbank):	1.12.3 rev 55000
+  Alternate firmware (backup bootbank):	1.12.3 rev 55000
+✓ Upgrade complete. New firmware version: 1.12.3 rev 55000
 ```
 
 ## Example: with --force
@@ -68,7 +68,7 @@ Logging in to 192.168.99.133...
 ✓ Login successful
 Fetching device information...
   Device model: n/a
-  Current firmware (active bootbank):	1.12.3 rev 54999
+  Current firmware (active bootbank):	1.12.3 rev 55000
   Alternate firmware (backup bootbank):	1.12.3 rev 54970
 ⚠ Force flag enabled - skipping version extraction and comparison
 
