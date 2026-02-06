@@ -93,8 +93,9 @@ Logging in to 192.168.99.133...
 ✓ Login successful
 Fetching device information...
   Device model: TNA-301
-  Current firmware (active bootbank):	1.12.3 rev 54999
-  Alternate firmware (backup bootbank):	1.12.3 rev 54999
-✓ Upgrade complete. New firmware version: 1.12.3 rev 54999```
+  Current firmware (active bootbank):	1.12.3 rev 55000
+  Alternate firmware (backup bootbank):	1.12.3 rev 55000
+✓ Upgrade complete. New firmware version: 1.12.3 rev 55000
+```
 
 
