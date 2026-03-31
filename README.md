@@ -14,8 +14,31 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 ## API Specs
 
 <table>
+<tr> <td colspan="6"> <br/> <img width="40px" src="https://tachyon-networks.com/img/products/tna_305x_front_small.png"/> 
+  <br><b> TNA-305 Product family</b> (60+5/6GHz wireless)  <br/> <br/></td></tr>
+
+<tr> 
+<td><b>Version</b></td>
+<td><b>Date</b></td>
+<td><b>Firmware</b></td>
+<td><b>Swagger Docs</b></td>
+<td><b>Config Key Schema</b></td>
+<td><b>Notes </b></td>
+</tr>
+
+<tr> 
+<td>1.0.8 </td>
+<td>March 31, 2026 </td>
+<td>v1.14.0+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.8/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.8/keys.html">Config keys</a> </td>
+<td>Initial support for the TNA-305X/TNA-305A (5GHz support only) </td>
+</tr>
+
+</table>
+<table>
 <tr> <td colspan="6"> <br/> <img width="70px" src="https://tachyon-networks.com/img/github/tna_github.png"/> 
-  <br><b> TNA-30x Product family</b> (60GHz wireless)  <br/> <br/></td></tr>
+  <br><b> TNA-30x Product family</b> (Pure 60GHz wireless)  <br/> <br/></td></tr>
 
 <tr> 
 <td><b>Version</b></td>
