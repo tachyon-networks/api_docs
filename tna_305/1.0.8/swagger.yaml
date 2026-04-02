@@ -1,0 +1,1134 @@
+openapi: '3.0.2'
+info:
+  title: Tachyon Networks Public API v1.0.8
+  version: '1.0.8'
+  description: Use this API to access information and configure your Tachyon Networks TNA-305 series devices, running firmware 1.14.0 and later. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api" target="_new">here</a>.
+servers:
+  - url: http://{deviceMgmtIp}/cgi.lua/apiv1
+    variables:
+      deviceMgmtIp:
+        default: 192.168.2.1
+        description: Device's management IP address
+security:
+  - cookieAuth: []
+paths:
+  /login:
+    post:
+      description: Post login credentials to your device in order to authenticate your client.
+      requestBody:
+        description: Login credentials.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  description: User's username.
+                  type: string
+                  example: root
+                password:
+                  description: User's password.
+                  type: string
+                  example: admin
+      responses: 
+        200:
+          description: Successful login response containing api token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  token:  
+                    type: string
+                    example: BCIHXGDDAAAAAAGVLFXNDYXRCCCJKGQFFA2F7BW2VPPN6===
+                    description: API token that will need to be included in subsequent API requests.
+                  level: 
+                    type: integer
+                    example: 0
+                    enum: [0,9]
+                    description: User access level.  0 = Admin, 9 = Read-only.
+                  auth: 
+                    type: boolean
+                    example: true
+                    description: Authorization status.
+        401:
+          description: Failed login response. 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+
+    delete:
+      description: Logout of your API session.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API token representing the session you wish to delete.
+          required: true
+      responses:
+        200:
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /reboot:
+    post:
+      description: Reboot the device
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200:
+          description: Ok status response is always returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /update:
+    get:
+      description: Get the current firmware task status details, if they exist.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200:
+          description: Response object containing details about the current firmware upgrade task. An empty object will be returned if no task exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    description: Status of the current firmware update task. 
+                    type: string
+                    enum: [FAIL, SUCCESS, IN_PROGRESS]
+                    example: FAIL
+                  state:
+                    description: Current state of the firmware update task. 
+                    type: string
+                    enum: [FIMRWARE_DOWNLOAD, FIRMWARE_FLASHING]
+                    example: FIMRWARE_DOWNLOAD
+                  last_changed:
+                    description: Timestamp of the last change to the firmware update task.
+                    type: integer
+                    example: 1621635010
+                  error: 
+                    description: Optional detailed error message in the case of the FAIL status.
+                    type: string
+                    example: "Unable to download file: curl(6) - Couldn't resolve host 'bad-firmware-url.com'"
+                  comment:
+                    description: Optional non-error comment/message regarding the task's current status.  This field is only populated after flashing is complete.
+                    type: string
+                    example: Reboot device for the new firmware to become active.
+                  URL: 
+                    description: Optional URL of the firmware provided by the user. Included for FIRMWARE_DOWNLOAD states.
+                    type: string
+                    example: https://bad-firmware.url
+              examples:
+                no-task:
+                  summary: GET /update - no task exists
+                  value:
+                    {}
+                bad-url:
+                  summary: GET /update - invalid firmware URL
+                  value:
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+                download-success:
+                  summary: GET /update - download succeeded
+                  value:
+                    {"status":"SUCCESS","url":"https://tachyon-networks.com/fw/tna-30x-1.11.1-r53981-20230426-tn-110-prs-squashfs-sysupgrade.bin","state":"FIRMWARE_DOWNLOAD","last_changed":1682628473}
+                download-failure:
+                  summary: GET /update - download failed
+                  value:
+                    {"state":"FIRMWARE_DOWNLOAD","last_changed":1682628379,"status":"FAIL","url":"https://badurl.com","error":"Unable to download file: curl: (28) Failed to connect to badurl.com port 443: Operation timed out\n"}
+                flashing-in-progress:
+                  summary: GET /update - flashing in progress
+                  value:
+                    {"status":"IN_PROGRESS","last_changed":1682628956,"state":"FIRMWARE_FLASHING"}
+                flashing-complete:
+                  summary: GET /update - flashing complete
+                  value:
+                    {"status":"COMPLETE","last_changed":1682628969,"comment":"Reboot device for the new firmware to become active.","state":"FIRMWARE_FLASHING"}
+                flashing-failure:
+                  summary: GET /update - flashing failed
+                  value:
+                    {"status":"FAIL","url":"Invalid firmware upgrade: local firmware file is missing.","state":"FIRMWARE_FLASHING","last_changed":1682890699}
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples: 
+                invalid-url:
+                  summary: GET /update - invalid firmware URL
+                  value:
+                    {"statusCode":400,"error":{"details":"Invalid firmware URL, only http/https protocols are currently supported.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+        401:
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+    put:
+      description: Instruct the device to asynchronously download a firmware file from the specified URL.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        description: Firmware download request.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [firmware_url]
+              properties:
+                firmware_url:
+                  description: URL of the firmware file to download. Only http and https protocols are supported.
+                  type: string
+                  example: https://tachyon-networks.com/firmware/tna-30x-1.11.0-upgrade-squashfs.bin
+      responses:
+        200: 
+          description: Success response returned after performing basic validation on the parameters. Use the GET /update route to fetch the actual download status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Description of the error.
+                    type: string
+                    example: Missing Firmware URL.
+    post:
+      description: Instruct the device to begin flashing the previously-downloaded firmware to the alternate bootbank, and optionally reset to defaults upon next bootup. This process will not affect the operation of the device - firmware will be updated only upon reboot. The same goes for resetting to defaults.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        description: Optional flash parameters.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reset:
+                  description: Whether or not the device should be reset to defaults after flashing is complete.
+                  type: boolean
+                  example: false
+                  default: false
+                force:
+                  description: Whether or not the device should force flash the firmware image, even if it appears invalid. Please contact support if you plan on using this field.
+                  type: boolean
+                  example: false
+                  default: false
+      responses:
+        200:
+          description: Success response will be returned if firmware was successfully downloaded and validated, and flashing has begun.  Use the GET /update route to check on the status of the flashing process.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        400: 
+          description: Failure response for an invalid request, such as missing one or more parameters, or a missing firmware image.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                no-firmware-uploaded:
+                  summary: POST /update - no firmware file uploaded
+                  value: {"statusCode":400,"error":{"details":"Invalid firmware upgrade: local firmware file is missing.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+
+                bad-firmware-file:
+                  summary: POST /update - firmware file failed validation
+                  value: {"statusCode":400,"error":{"details":"Invalid firmware file: local firmware file didn't pass validation.","path":"/cgi.lua/apiv1/update"},"description":"Bad Request"}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /stats:
+    get:
+      description: Fetch system, wireless, ethernet, and/or network statistics from the device.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+        - in: query
+          name: type
+          schema:
+            type: string
+            example: system,wireless
+          description: "Type of stats to fetch: system, wireless, ethernet, and/or network (multiple types can be specified in a comma-seperated list)."
+          required: true
+      responses: 
+        200:
+          description: JSON object containing the requested stats. See output examples below.  
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                wireless-stats:
+                  summary: GET /stats?type=wireless - wireless statistics
+                  value:
+                    {
+                      "wireless": {
+                        "peers": [
+                          {
+                            "rx_bytes": 1647,
+                            "rx_sector": 3,
+                            "snr": 0,
+                            "rssi": -128,
+                            "fw": "1.14.0.r7951",
+                            "retry_histogram": {},
+                            "tx_packets": 0,
+                            "rx_packets": 71,
+                            "mac": "78:5E:E8:DD:01:2B",
+                            "tx_sector": 25,
+                            "connection_time": 4191,
+                            "tx_mcs": 1,
+                            "radio_name": "wlan0",
+                            "rx_mcs": 0,
+                            "remote_rssi": -42,
+                            "ipv6": "2605:8600:640:2d6e:7a5e:e8ff:fedd:12a",
+                            "mcs_histogram": {},
+                            "system_name": "TNA-305X STA",
+                            "ipv4": "192.168.99.79",
+                            "tx_rate": 385,
+                            "system_desc": "Tachyon Networks TNA-305X: v1.14.0 r7951",
+                            "antenna_kit": "none",
+                            "model": "TNA-305X",
+                            "tx_bytes": 0,
+                            "iface_name": "prs1",
+                            "rx_rate": 27,
+                            "est_link_distance": 0
+                          },
+                          {
+                            "rx_bytes": 565351,
+                            "tx_bytes": 5398997,
+                            "vap": "ath1",
+                            "rssi": -50,
+                            "width": "20",
+                            "tx_rate": 258,
+                            "tx_packets": 8160,
+                            "rx_packets": 5224,
+                            "mac": "78:5E:E8:DD:01:2D",
+                            "rx_rate": 309,
+                            "connection_time": 4083
+                          }
+                        ],
+                        "histogram_updated_at": 1775015425,
+                        "radios": {
+                          "wifi0": {
+                            "rx_bytes": 0,
+                            "op_mode": "master",
+                            "tx_bytes": 0,
+                            "freq": 2437,
+                            "ssid": "tachyon-mgmt-D0FF05",
+                            "channel": 6,
+                            "tx_packets": 0,
+                            "name": "wifi0",
+                            "rx_packets": 0,
+                            "vap": "ath0",
+                            "mac": "78:5E:E8:D0:FF:07",
+                            "security": "WPA2-PSK (TKIP/CCMP)"
+                          },
+                          "wifi1": {
+                            "rx_bytes": 39941806,
+                            "op_mode": "master",
+                            "tx_bytes": 60991115,
+                            "freq": 5180,
+                            "ssid": "tachyon-ptmp",
+                            "channel": 36,
+                            "tx_packets": 646644,
+                            "name": "wifi1",
+                            "rx_packets": 35200,
+                            "vap": "ath1",
+                            "mac": "78:5E:E8:D0:FF:08",
+                            "security": "WPA2/WPA3-PSK (TKIP/CCMP)"
+                          },
+                          "wlan0": {
+                            "rx_bytes": 668872,
+                            "op_mode": "master",
+                            "tx_bytes": 26438461,
+                            "radio_temp": 45,
+                            "tx_packets": 162716,
+                            "channel_label": "5",
+                            "channel_width": 2160,
+                            "ssid": "tachyon-ptmp",
+                            "boresight_lock": false,
+                            "freq": 66960,
+                            "antenna_kit": "none",
+                            "mac": "78:5E:E8:D0:FF:06",
+                            "name": "wlan0",
+                            "channel": 5,
+                            "modem_temp": 46,
+                            "ptp": false,
+                            "rx_packets": 1267,
+                            "security": "WPA2-PSK (AES)"
+                          }
+                        }
+                      }
+                    }
+                system-stats:
+                  summary: GET /stats?type=system - system statistics
+                  value: {"system":{"epoch_time":1774986967,"description":"","cpu_usage_percent":7.3800745010375977,"fw_version":"1.14.0 rev 7951","serial_no":"TNA305X00000123","uptime":4301,"bootbanks":{"backup":{"bootbank":1,"version":"1.14.0 rev 8014"},"active":{"bootbank":2,"version":"1.14.0 rev 7951"}},"memory":{"used":382091264,"total":932691968,"usage":41,"free":550600704},"name":"TNA-305X-office-1-ap","model":"TNA-305A","location":"GR1 Office","hostname":"tachyon-305x-office-1-ap","clock_datetime":"2026/03/31 12:56:07","cpu_temp":58}}
+                ethernet-stats:
+                  summary: GET /stats?type=ethernet - ethernet statistics
+                  value: {"ethernet":{"ports":{"eth0":{"duplex":"full","tx_bytes":25340950,"link":true,"autoneg":true,"tx_errors":0,"rx_errors":3,"tx_packets":30253,"name":"eth0","rx_packets":1232469,"speed":1000,"rx_bytes":335682305,"mac":"78:5E:E8:D0:FF:05"}}}}
+                network-stats:
+                  summary: GET /stats?type=network - network statistics
+                  value:
+                    {"network":{"zones":{"wan":{"mgmt_vlan":{"enabled":false},"data_bridge":{"mac":"78:5E:E8:D0:FF:05","ipv6":{"ip_address":["2605:8600:640:2d6e:7a5e:e8ff:fed0:ff05/64","fe80::7a5e:e8ff:fed0:ff05/64"],"gateway":"fe80::9c05:d6ff:fed9:1179"},"data_vlan":{"enabled":false},"ipv4":{"ip_address":["169.254.1.1/16","192.168.99.90/24"],"gateway":"192.168.99.1"},"interface":"br-wan"}}},"dns":{"dhcp.br-wan":["192.168.99.1"]},"hostname":"tachyon-305x-down-ap","dhcp_status":{"br-wan":[[{"discovery":true,"lease_server":"192.168.99.1","fallback":{"prefix":24,"ip":"192.168.1.1"},"custom_dns":false,"lease_lifetime":86400,"dns":["192.168.99.1"],"prefix":24,"gateway":"192.168.99.1","status":"renew","lease_acquired":1774986854,"metric":0,"ip":"192.168.99.90"}]]},"dns6":{"dhcp.br-wan":{}}}}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /speedtest:
+    get:
+      description: Get the last results of a speedtest initiated via the POST /speedtest route.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses: 
+        200:
+          description: JSON object containing the last speedtest results, or an empty object if none exists. See the support site for additional examples.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  last_changed:
+                    type: integer
+                    example: 1672813492
+                    description: Timestamp containing the date/time that the speedtest results were last updated.
+                  peer_mac:
+                    type: string
+                    example: 78:5E:E8:D0:00:24
+                    description: The MAC address of the peer where the speedtest was run.
+                  reverse:
+                    type: boolean
+                    example: false
+                    description: Whether or not this speedtest direction was reversed.
+                  radio:
+                    type: string
+                    example: wlan0
+                    enum: [wlan0, wifi1]
+                    description: The radio interface that was used for this speedtest.
+                  status:
+                    type: string
+                    example: ok
+                    enum: [ok, error]
+                    description: General status of the speedtest.
+                  error:
+                    type: string
+                    example: "speedtest: already running, aborted"
+                    description: Description of the error, if status is set to 'error'
+                  mbps:
+                    type: integer
+                    example: 2715
+                    description: The speed in mbps achieved during this speedtest (rounded to nearest integer). This will be missing if the speedtest could not be run.
+              examples:
+                valid-test:
+                  summary: GET /speedtest - completed test
+                  value:
+                    {"last_changed":1673316582,"peer_mac":"78:5E:E8:D0:10:22","reverse":false,"radio":"wlan0","status":"ok","mbps":2715}
+                valid-test-wifi1:
+                  summary: GET /speedtest - completed test on wifi1 radio
+                  value:
+                    {"last_changed":1673316582,"peer_mac":"78:5E:E8:DD:01:2D","reverse":false,"radio":"wifi1","status":"ok","mbps":258}
+                valid-no-results:
+                  summary: GET /speedtest - test not started
+                  value: {}
+                error-no-response:
+                  summary: GET /speedtest - failed test
+                  value: {"last_changed":1673316706,"peer_mac":"78:5E:E8:D0:10:23","reverse":false,"radio":"wlan0","status":"error","error":"Remote peer does not respond"}
+                error-already-running:
+                  summary: GET /speedtest - already running
+                  value: {"last_changed":1673316639,"peer_mac":"78:5E:E8:D0:10:22","reverse":false,"radio":"wlan0","status":"error","error":"speedtest: already running, aborted."}
+                error-invalid-peer:
+                  summary: GET /speedtest - invalid peer
+                  value: {"last_changed":1673316673,"peer_mac":"blahblah","reverse":false,"radio":"wlan0","status":"error","error":"Invalid peer 78 (detected 2 peer(s))"}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+    post:
+      description: Begin a speedtest. Peer MAC is only required when performing a speedtest on a device in Access Point mode. Optionally specify the radio interface to test on (defaults to wlan0 for 60GHZ, use wifi1 for 5/6GHz).
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        description: Speedtest parameters. Peer MAC is required in AP mode.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                peer_mac:
+                  description: The wireless MAC address of the peer device to test against. Required when the device is operating in AP mode, optional in station mode.
+                  type: string
+                  example: 78:5E:E8:D0:00:24
+                reverse:
+                  description: Set to true to run the speed test in reverse (remote to local).
+                  type: boolean
+                  example: false
+                  default: false
+                radio:
+                  description: The radio interface to run the speedtest on. Use "wlan0" for the 60GHz PRS radio (default) or "wifi1" for the 5/6GHz Wi-Fi radio.
+                  type: string
+                  enum: [wlan0, wifi1]
+                  example: wlan0
+                  default: wlan0
+      responses:
+        200:
+          description: Success response when starting a speedtest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessReponse'
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Error status code matching HTTP status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Short description of the error.
+                    example: Bad Request
+                    type: string
+                  error:
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: Peer mac is required for AP mode.
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/speedtest
+              examples:
+                missing-peer-mac:
+                  summary: Missing peer MAC in AP mode
+                  value: {"statusCode":400,"error":{"details":"Peer mac is required for AP mode.","path":"/cgi.lua/apiv1/speedtest"},"description":"Bad Request"}
+                invalid-radio:
+                  summary: Invalid radio interface name
+                  value: {"statusCode":400,"error":{"details":"Invalid radio interface name","path":"/cgi.lua/apiv1/speedtest"},"description":"Bad Request"}
+                invalid-reverse:
+                  summary: Invalid reverse parameter
+                  value: {"statusCode":400,"error":{"details":"Reverse must be true or false","path":"/cgi.lua/apiv1/speedtest"},"description":"Bad Request"}
+  /aiming:
+    get:
+      description: Get the current status of the aiming mode session. Returns whether aiming is running or stopped, along with session details if active.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200:
+          description: JSON object containing the current aiming session status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [running, stopped]
+                    example: running
+                    description: Current status of the aiming session.
+                  last_updated:
+                    type: integer
+                    example: 1682628473
+                    description: Timestamp of the last status update. Only present when aiming is running.
+                  remaining:
+                    type: integer
+                    example: 245
+                    description: Remaining time in seconds for the aiming session. Only present when aiming is running.
+                  channel:
+                    type: integer
+                    example: 5
+                    description: The channel being used during aiming. Only present when aiming is running.
+                  channel_width:
+                    type: integer
+                    example: 2160
+                    description: The channel width being used during aiming. Only present when aiming is running.
+                  duration:
+                    type: integer
+                    example: 300
+                    description: The total duration in seconds for the aiming session. Only present when aiming is running.
+              examples:
+                aiming-running:
+                  summary: GET /aiming - aiming in progress
+                  value:
+                    {"status":"running","last_updated":1682628473,"remaining":245,"channel":5,"channel_width":2160,"duration":300}
+                aiming-stopped:
+                  summary: GET /aiming - aiming not active
+                  value:
+                    {"status":"stopped"}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+    post:
+      description: Start an aiming mode session. The device will enter aiming mode for the specified duration (default 5 minutes). Only one aiming session can be active at a time.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        description: Optional aiming session parameters.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                duration:
+                  description: Duration in seconds for the aiming session. Defaults to 300 (5 minutes) if not specified.
+                  type: integer
+                  example: 300
+                  default: 300
+      responses:
+        200:
+          description: Response indicating the aiming session was successfully started.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: Whether the aiming session was successfully started.
+              examples:
+                aiming-started:
+                  summary: POST /aiming - successfully started
+                  value:
+                    {"success":true}
+        409:
+          description: Conflict - an aiming session is already running.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                already-running:
+                  summary: POST /aiming - already running
+                  value:
+                    {"statusCode":409,"description":"Conflict","error":{"details":"Already aiming","path":"/cgi.lua/apiv1/aiming"}}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+    delete:
+      description: Stop the current aiming mode session.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses:
+        200:
+          description: Response indicating the aiming session was stopped successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Stopping aiming now
+                    description: Status message describing the result.
+              examples:
+                aiming-stopped:
+                  summary: DELETE /aiming - stopped successfully
+                  value:
+                    {"status":"Stopping aiming now"}
+        409:
+          description: Conflict - no aiming session is currently running.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                not-running:
+                  summary: DELETE /aiming - not running
+                  value:
+                    {"statusCode":409,"description":"Conflict","error":{"details":"Aiming not running, nothing to stop","path":"/cgi.lua/apiv1/aiming"}}
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+  /bridge_table:
+    get:
+      description: Get the output of the bridge table.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      responses: 
+        200:
+          description: JSON object containing this device's bridge table entries.  The value for the bridge_table field will be an empty object {} when there are no entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  bridge_table:  
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        mac:
+                          description: MAC address of the bridge table entry.
+                          type: string
+                          example: 78:28:ca:32:3c:08
+                        bridge: 
+                          description: The name of the bridge interface containing this MAC.
+                          type: string
+                          example: br-wan
+                        iface:
+                          description: The interface behind which this MAC address lives. 
+                          type: string
+                          example: eth0
+              examples:
+                ap-bridge-table:
+                  summary: GET /bridge_table - AP with connected clients
+                  value:
+                    {"bridge_table":[{"mac":"0c:62:a6:98:b9:21","bridge":"br-wan","iface":"eth0"},{"mac":"04:5d:4b:2c:10:b5","bridge":"br-wan","iface":"eth0"},{"mac":"00:0c:29:b5:8f:ed","bridge":"br-wan","iface":"eth0"},{"mac":"78:28:ca:32:3c:08","bridge":"br-wan","iface":"eth0"},{"mac":"44:07:0b:63:8d:11","bridge":"br-wan","iface":"eth0"},{"mac":"94:9f:3e:03:0a:f4","bridge":"br-wan","iface":"eth0"},{"mac":"c4:f1:74:78:a9:32","bridge":"br-wan","iface":"eth0"},{"mac":"24:5e:be:4e:70:d3","bridge":"br-wan","iface":"eth0"},{"mac":"44:61:32:7a:02:41","bridge":"br-wan","iface":"eth0"},{"mac":"78:28:ca:32:3b:cc","bridge":"br-wan","iface":"eth0"},{"mac":"94:9f:3e:7b:8e:3a","bridge":"br-wan","iface":"eth0"},{"mac":"c4:93:00:32:f2:e5","bridge":"br-wan","iface":"eth0"},{"mac":"dc:2c:6e:44:09:47","bridge":"br-wan","iface":"eth0"},{"mac":"78:5e:e8:d0:00:18","bridge":"br-wan","iface":"eth0"},{"mac":"78:5e:e8:00:0d:05","bridge":"br-wan","iface":"eth0"},{"mac":"da:eb:58:31:f0:cc","bridge":"br-wan","iface":"eth0"},{"mac":"94:9f:3e:03:01:ec","bridge":"br-wan","iface":"eth0"},{"mac":"2c:fd:b3:a9:56:e4","bridge":"br-wan","iface":"eth0"},{"mac":"94:9f:3e:7c:9b:aa","bridge":"br-wan","iface":"eth0"},{"mac":"6e:30:2a:b9:a5:ef","bridge":"br-wan","iface":"eth0"},{"mac":"1c:57:dc:7e:99:99","bridge":"br-wan","iface":"eth0"},{"mac":"00:0c:29:6f:bb:4e","bridge":"br-wan","iface":"eth0"},{"mac":"90:0f:0c:5e:93:ab","bridge":"br-wan","iface":"eth0"},{"mac":"ba:1c:d8:f2:53:04","bridge":"br-wan","iface":"eth0"},{"mac":"94:3c:c6:6b:80:28","bridge":"br-wan","iface":"eth0"},{"mac":"5a:1e:49:e8:0d:8f","bridge":"br-wan","iface":"eth0"},{"mac":"78:5e:e8:d0:10:20","bridge":"br-wan","iface":"prs0"},{"mac":"78:5e:e8:d0:00:22","bridge":"br-wan","iface":"prs1"}]}
+                empty:
+                  summary: GET /bridge_table - no entries
+                  value: {"bridge_table":{}}
+
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                unauth:
+                  summary: GET /bridge_table - unauthorized
+                  value:
+                    {
+                    "statusCode": 401,
+                    "description": "Unauthorized",
+                    "error": {
+                      "details": "Authorization Failed",
+                      "path": "/cgi.lua/apiv1/bridge_table"
+                    }
+                  }
+  /config:
+    get:
+      description: Get the device's current configuration.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.  Optionally pass target=test to get the current test run status.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+        - in: query
+          name: target
+          schema:
+            type: string
+            enum: [test]
+          description: Set to "test" to retrieve the current test run status instead of the full configuration.
+          required: false
+      responses:
+        200:
+          description: JSON object containing the device's current configuration, or test run status when target=test is specified.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                full-config:
+                  summary: GET /config - full device configuration
+                  value:
+                    {"config":{"system":{"device_name":"Tachyon Networks PtMP","reset_button":{"enabled":true},"hostname":"tachyon-ptmp-ap","users":[{"username":"root","type":"admin","password_hash":"$1$6Hzch.yD$ULugJ982Yb1D0g8zhqv3T.","enabled":true},{"username":"guest","type":"read-only","password_hash":"$1$/DpVqAVi$ZwWGYO83CGVclJeuwBb5C0","enabled":true}],"device_location":"A/V Closet","timezone":"America/Los_Angeles"},"wireless":{"radios":{"wlan0":{"channel_width":2160,"antenna_kit":"none","ssid":"tachyon-ptmp","channel":6,"max_mcs":12,"mode":"ap","ptp":false,"passphrase":"passphrase","security":"wpapsk"}}},"network":{"wan":{"ipv6":{"enabled":false},"data_vlan":{"enabled":false},"ipv4":{"enabled":true,"prefix":24,"custom_dns":true,"dns_servers":["1.1.1.1","1.0.0.1"],"ipaddr":"192.168.1.1","dhcp_broadcast":false},"mgmt_vlan":{"enabled":false},"ip_mode":"dhcp"},"traffic_control":{"limit_download":{"enabled":false},"limit_upload":{"enabled":false}},"poe_out_enabled":false,"general":{"ageing_time":300,"mtu":1501}},"services":{"snmp":{"v2":{"enabled":true,"community":"public"},"v3":{"enabled":false}},"ping_watchdog":{"enabled":false},"http":{"https_port":443,"port":80},"remote_syslog":{"enabled":false},"snmp_traps":{"enabled":false},"discovery":{"enabled":true,"broadcast_protocols":{"lldp":true,"cdp":true,"mndp":true},"lldp_server":{"enabled":true}},"ntp":{"enabled":true,"servers":["time.google.com","time.cloudflare.com"]}}}}
+                test-run-not-active:
+                  summary: GET /config?target=test - no test running
+                  value:
+                    running: false
+                test-run-active:
+                  summary: GET /config?target=test - test in progress
+                  value:
+                    running: true
+                    timeout: 290
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                unauth:
+                  summary: GET /config - unauthorized
+                  value:
+                    {
+                    "statusCode": 401,
+                    "description": "Unauthorized",
+                    "error": {
+                      "details": "Authorization Failed",
+                      "path": "/cgi.lua/apiv1/config"
+                    }
+                  }
+        500:
+          description: JSON object containing error information in the event that a system or fatal error occurs while fetching the config.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                unauth:
+                  summary: GET /config - internal server error
+                  value:
+                    {
+                    "statusCode": 500,
+                    "description": "Internal Server Error",
+                    "error": {
+                      "details": "System error - internal conversion failed: (internal error detail here)",
+                      "path": "/cgi.lua/apiv1/config"
+                    }
+                  }
+    post:
+      description: Update the device's configuration and restart networking services, or perform a test or dry run.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+      requestBody:
+        description: Configuration update request. Supply `config` with a config change, optionally with `dry_run` or `test_run`. Or supply `action` to manage an active test run.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  description: "The full device configuration object as returned by GET /config. Modify the desired fields and submit the entire config object. See the <a href='keys.html' target='_new'>Config Key Specs</a> page for available keys and values."
+                  type: object
+                  example: {"...": "full device config as fetched from GET /config, with desired changes applied"}
+                dry_run:
+                  description: Whether or not this config change should be a dry run - meaning the device's configuration will not be affected. Set this flag if you wish to check for any errors or to view the list of changed keys before making any real changes. Cannot be set when test_run is true.
+                  type: boolean
+                  example: false
+                  default: false
+                test_run:
+                  description: Whether or not this config change should be a test run - meaning the new configuration will be applied, but if it's not confirmed within the test_duration period, it will revert back to the previous configuration. Cannot be set when dry_run is true. Not allowed when the config change requires a reboot.
+                  type: boolean
+                  example: false
+                  default: false
+                test_duration:
+                  description: When test_run is set to true, optionally specify the test duration in seconds. Defaults to 120 seconds.
+                  type: integer
+                  example: 300
+                  default: 120
+                action:
+                  description: Manage an active test run. The available actions are "abort" (revert to the previous running configuration) and "confirm" (save the current configuration as the running configuration). No config object is needed when using this field.
+                  type: string
+                  enum: [abort, confirm]
+                  example: abort
+            examples:
+                config-change-normal: 
+                  summary: POST /config
+                  value: {"config": "full device config as fetched from GET /config, with desired changes applied"}
+                config-change-dry-run: 
+                  summary: POST /config  - with dry run
+                  value: {"config": "full device config as fetched from GET /config, with desired changes applied", "dry_run": true}
+                config-change-test-run: 
+                  summary: POST /config - with test run
+                  value: {"config": "full device config as fetched from GET /config, with desired changes applied", "test_run": true, "duration": 500}
+                abort-test: 
+                  summary: POST /config - abort test
+                  value: { "action": "abort"}
+              
+                confirm-test: 
+                  summary: POST /config - confirm test
+                  value: { "action": "confirm"}
+      responses:
+        200:
+          description: JSON object containing the information related to a successful configuration update operation or config test action.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_msg:
+                      description: Detailed status message.
+                      example: Configuration saved, applying changes now.
+                      type: string
+                  response:
+                      description: JSON object containing information about the config update operation.
+                      type: object 
+                      properties: 
+                        reboot_required: 
+                          type: boolean
+                          example: false
+                          description: Whether or not a reboot is required to apply these changes.
+                        warnings:
+                          description: JSON object containing config key warnings. 
+                          type: object
+                        keys_added:
+                          type: object
+                          description: JSON object containing new config keys. 
+                        keys_removed:
+                          type: object
+                          description: JSON object containing removed config keys. 
+                        keys_changed:
+                          type: object
+                          description: JSON object containing changed config keys. 
+                          
+              examples:
+                config-change-add-user: 
+                  summary: POST /config - successful config save after adding a new user
+                  value:
+                    status_msg: Configuration saved, applying changes now.
+                    response:
+                      reboot_required: false
+                      keys_removed: {}
+                      keys_added: {"system.users.4":{"username":"guest1","type":"read-only","password_hash":"$1$ohSsj1Ga$xF6ruORwRp1TNYmUjRgQn0", "enabled":true}}
+                      keys_changed: {}
+                      warnings: {}
+                action-abort-success:
+                  summary: POST /config - test aborted successfully
+                  value:
+                    status_msg: "Test aborted, reverting to previous configuration"
+                action-confirm-success:
+                  summary: POST /config - test confirmed successfully
+                  value:
+                    status_msg: "Test confirmed, configuration applied permanently"
+
+        500:
+          description: JSON object containing error information in the event that a system or fatal error occurs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  statusCode: 
+                    description: Error status code matching HTTP status code.
+                    type: integer
+                    example: 500
+                  description:
+                    description: Short description of the error.
+                    example: Internal Server Error
+                    type: string
+                  error: 
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: "System error - failed to run config validation: (internal error detail here)"
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/config
+        401:
+          description: Unauthorized response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+        400:
+          description: Failure response for an invalid request, such as missing one or more parameters, or for passing an invalid config JSON object. For an invalid config, only the first error is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    description: Status code.
+                    type: integer
+                    example: 400
+                  description:
+                    description: Short description of the error.
+                    example: Bad Request
+                    type: string
+                  error: 
+                    type: object
+                    properties:
+                      details:
+                        description: Detailed error message.
+                        type: string
+                        example: Missing config in POST data.
+                      path:
+                        type: string
+                        description: Route where this error occurred.
+                        example: /cgi.lua/apiv1/config
+              examples:
+                invalid-config-key:
+                  summary: POST /config - invalid config key
+                  value:
+                    statusCode: 400
+                    description: "Bad Request"
+                    error:
+                      details: "Configuration validation failed: The key network.traffic_control.limit_upload.rate_limit is missing, but dependent on key network.traffic_control.limit_upload.enabled being set to true"
+                      path: "/cgi.lua/apiv1/config"
+                no-test-running:
+                  summary: POST /config - no test currently running
+                  value:
+                    statusCode: 400
+                    description: "Bad Request"
+                    error:
+                      details: "No test is currently running"
+                      path: "/cgi.lua/apiv1/config"
+                invalid-action:
+                  summary: POST /config - invalid action value
+                  value:
+                    statusCode: 400
+                    description: "Bad Request"
+                    error:
+                      details: "Invalid action"
+                      path: "/cgi.lua/apiv1/config"
+        409:
+          description: Failure response when attempting to set config while a test is already ongoing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
+              examples:
+                config-test-in-progress:
+                  summary: POST /config - config test already in progress
+                  value:
+                    {"statusCode":409,"description":"Conflict","error":{"details":"Configuration test in progress. Confirm or abort the test first.","path":"/cgi.lua/apiv1/config"}}
+components:
+  securitySchemes:
+    cookieAuth:         # arbitrary name for the security scheme; will be used in the "security" key later
+      type: apiKey
+      in: cookie
+      name: api_token
+  schemas:
+    GenericSuccessReponse:
+      type: object
+      properties:
+        status:
+          description: Status of the response. 
+          type: string
+          example: ok
+    GenericFailureReponse:
+      type: object
+      properties: 
+        statusCode: 
+          description: Error status code matching HTTP status code.
+          type: integer
+          example: 401
+        description:
+          description: Short description of the error.
+          example: Unauthorized
+          type: string
+        error: 
+          type: object
+          properties:
+            details:
+              description: Detailed error message.
+              type: string
+              example: Authorization Failed
+            path:
+              type: string
+              description: Route where this error occurred.
+              example: /cgi.lua/apiv1/stats
+
+      
