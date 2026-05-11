@@ -2,7 +2,7 @@ openapi: '3.0.2'
 info:
   title: Tachyon Networks Public API v1.0.8
   version: '1.0.8'
-  description: Use this API to access information and configure your Tachyon Networks TNA-300 series devices, running firmware 1.12.2 and later. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api" target="_new">here</a>.
+  description: Use this API to access information and configure your Tachyon Networks TNA-300 series devices, running firmware 1.15.0 and later. Additional usage tips can be found on the support site <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000659777-tna-30x-restful-api" target="_new">here</a>.
 servers:
   - url: http://{deviceMgmtIp}/cgi.lua/apiv1
     variables:
