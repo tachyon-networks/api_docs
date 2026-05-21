@@ -50,9 +50,20 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 </tr>
 
 <tr> 
+<td>1.0.8 </td>
+<td>May 21, 2026 </td>
+<td>v1.15.0+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.8/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.8/keys.html">Config keys</a> </td>
+<td>
+See "API changes" in the <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000710575-tna-300-series-firmware-releases"> v1.15.0 release notes<a/> for a full list of changes in this version.
+</td>
+</tr>
+
+<tr> 
 <td>1.0.7 </td>
 <td>Jun 30, 2025 </td>
-<td>v1.12.2+</td>
+<td>v1.12.2</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.7/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.7/keys.html">Config keys</a> </td>
 <td>New keys have been added to the config schema to support the TNA-303L-65 2.4 mgmt radio and mgmt VLAN protocol. Carrier drop keys were added for existing 300 series products. Radio name was added to the wireless peer stats output. </td>
