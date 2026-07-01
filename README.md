@@ -27,6 +27,15 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 </tr>
 
 <tr> 
+<td>1.0.9 </td>
+<td>Coming soon </td>
+<td>v1.15.0+</td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.9/" target="_blank">API routes</a></td>
+<td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.9/keys.html">Config keys</a> </td>
+<td>Adding support for new keys added in firmware 1.15.0. </td>
+</tr>
+
+<tr> 
 <td>1.0.8 </td>
 <td>March 31, 2026 </td>
 <td>v1.14.0+</td>
@@ -34,8 +43,8 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.8/keys.html">Config keys</a> </td>
 <td>Initial support for the TNA-305X/TNA-305A (5GHz support only) </td>
 </tr>
-
 </table>
+
 <table>
 <tr> <td colspan="6"> <br/> <img width="70px" src="https://tachyon-networks.com/img/github/tna_github.png"/> 
   <br><b> TNA-30x Product family</b> (Pure 60GHz wireless)  <br/> <br/></td></tr>
