@@ -150,7 +150,8 @@ See "API changes" in the <a href="https://tachyon-networks.freshdesk.com/support
 <td>API support is limited to the following routes:  /login, /update, /reboot, & /stats, and configuration is not supported.</td>
 </tr>
 
-  </table>
+</table>
+
 <table>
 <tr> <td colspan="6"><br/><img width="50px" src="https://tachyon-networks.com/img/sw_small.png"/>  <br><b>TNS-100 Product family</b> (PoE switches) <br/> <br/></td></tr>
 
@@ -200,6 +201,6 @@ See "API changes" in the <a href="https://tachyon-networks.freshdesk.com/support
 <td>API support is limited to the following routes:  /login, /update, /poe_reset, /reboot, & /stats, and configuration is not supported.</td>
 </tr>
 
-<table>
+</table>
 
 
