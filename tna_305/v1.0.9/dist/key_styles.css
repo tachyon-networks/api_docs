@@ -1,0 +1,92 @@
+.toc div {
+    padding-bottom: 5px;
+}
+
+body { line-height: 25px; }
+
+li {
+    margin-bottom: 10px;
+}
+
+a {
+    cursor:pointer;
+}
+a.link { 
+    text-decoration: none;;
+    font-size: 14px;
+    color: #4990e2;
+}
+
+.key-title:hover {
+    background-color: #f6f6f6;
+}
+
+.key-title i {
+    float: right;
+    font-size: 20px;
+}
+
+.key-name {
+    padding: 10px;
+    background-color: #ffecc2;
+    border: 1px solid #f5c251;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+.key-title {
+    font-size: 22px;
+    text-transform: capitalize;
+    padding-bottom: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #bbbbbb;
+    font-weight: 700;
+}
+
+.key-desc {
+    padding: 10px;
+    font-size: .8em;
+    background-color: white;
+    border: 1px solid #f5c251;
+    border-top: 0px;
+}
+
+.key-rules {
+    margin-top:10px;
+    padding-top: 15px;
+    border-top: 1px solid #f5c251;
+}
+
+
+.swagger-ui table {
+
+        font-size: 13px;
+        width: auto;
+}
+
+.swagger-ui p {
+    margin-bottom: 0px;
+}
+
+.swagger-ui   table td { padding: 5px 10px 5px 0px !important; }
+
+table {
+    font-family: monospace;
+    margin-left: 25px;
+}
+
+.swagger-ui ul { 
+    margin-top: 0px;
+}
+
+.subtitle {
+    font-weight: 600;
+    padding-bottom: 10px;
+    padding-top: 15px;
+}
+
+table .label {
+    font-weight: 600;
+    color: #727272
+}
