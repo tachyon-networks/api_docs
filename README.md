@@ -28,7 +28,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 
 <tr> 
 <td>1.0.9 </td>
-<td>Coming soon </td>
+<td>July 17, 2026 </td>
 <td>v1.15.0+</td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.9/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_305/v1.0.9/keys.html">Config keys</a> </td>
@@ -65,7 +65,7 @@ This repo contains the swagger-based docs for the Tachyon Networks Public API ro
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.8/" target="_blank">API routes</a></td>
 <td><a href="https://tachyon-networks.github.io/api_docs/tna_30x/v1.0.8/keys.html">Config keys</a> </td>
 <td>
-See "API changes" in the <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000710575-tna-300-series-firmware-releases"> v1.15.0 release notes<a/> for a full list of changes in this version.
+See "API changes" in the <a href="https://tachyon-networks.freshdesk.com/support/solutions/articles/67000710575-tna-300-series-firmware-releases"> v1.15.0 release notes</a> for a full list of changes in this version.
 </td>
 </tr>
 
