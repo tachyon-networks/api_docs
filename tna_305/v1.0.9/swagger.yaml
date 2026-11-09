@@ -14,6 +14,7 @@ security:
 paths:
   /login:
     post:
+      summary: Authenticate and start an API session
       description: Post login credentials to your device in order to authenticate your client.
       requestBody:
         description: Login credentials.
@@ -61,6 +62,7 @@ paths:
                 $ref: '#/components/schemas/GenericFailureReponse'
 
     delete:
+      summary: End the current API session
       description: Logout of your API session.
       parameters:
         - in: cookie
@@ -84,6 +86,7 @@ paths:
                 $ref: '#/components/schemas/GenericFailureReponse'
   /reboot:
     post:
+      summary: Reboot the device
       description: Reboot the device
       parameters:
         - in: cookie
@@ -107,6 +110,7 @@ paths:
                 $ref: '#/components/schemas/GenericFailureReponse'
   /update:
     get:
+      summary: Get firmware task status
       description: Get the current firmware task status details, if they exist.
       parameters:
         - in: cookie
@@ -131,8 +135,8 @@ paths:
                   state:
                     description: Current state of the firmware update task. 
                     type: string
-                    enum: [FIMRWARE_DOWNLOAD, FIRMWARE_FLASHING]
-                    example: FIMRWARE_DOWNLOAD
+                    enum: [FIRMWARE_DOWNLOAD, FIRMWARE_FLASHING]
+                    example: FIRMWARE_DOWNLOAD
                   last_changed:
                     description: Timestamp of the last change to the firmware update task.
                     type: integer
@@ -196,6 +200,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
     put:
+      summary: Download a firmware image from a URL
       description: Instruct the device to asynchronously download a firmware file from the specified URL.
       parameters:
         - in: cookie
@@ -246,6 +251,7 @@ paths:
                     type: string
                     example: Missing Firmware URL.
     post:
+      summary: Flash the downloaded firmware
       description: Instruct the device to begin flashing the previously-downloaded firmware to the alternate bootbank, and optionally reset to defaults upon next bootup. This process will not affect the operation of the device - firmware will be updated only upon reboot. The same goes for resetting to defaults.
       parameters:
         - in: cookie
@@ -300,6 +306,7 @@ paths:
                 $ref: '#/components/schemas/GenericFailureReponse'
   /stats:
     get:
+      summary: Get device statistics
       description: Fetch system, wireless, ethernet, and/or network statistics from the device.
       parameters:
         - in: cookie
@@ -443,6 +450,7 @@ paths:
                 $ref: '#/components/schemas/GenericFailureReponse'
   /speedtest:
     get:
+      summary: Get the last speedtest results
       description: Get the last results of a speedtest initiated via the POST /speedtest route.
       parameters:
         - in: cookie
@@ -517,6 +525,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
     post:
+      summary: Start a speedtest
       description: Begin a speedtest. Peer MAC is only required when performing a speedtest on a device in Access Point mode. Optionally specify the radio interface to test on (defaults to wlan0 for 60GHZ, use wifi1 for 5/6GHz).
       parameters:
         - in: cookie
@@ -599,6 +608,7 @@ paths:
                   value: {"statusCode":400,"error":{"details":"Reverse must be true or false","path":"/cgi.lua/apiv1/speedtest"},"description":"Bad Request"}
   /aiming:
     get:
+      summary: Get aiming session status
       description: Get the current status of the aiming mode session. Returns whether aiming is running or stopped, along with session details if active.
       parameters:
         - in: cookie
@@ -656,7 +666,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
     post:
-      description: Start an aiming mode session. The device will enter aiming mode for the specified duration (default 5 minutes). Only one aiming session can be active at a time.
+      summary: Start an aiming session
+      description: Start an aiming mode session. The device will enter aiming mode for the specified duration (default 5 minutes). Only one aiming session can be active at a time. 
+        <br><br>
+        Aiming results will appear in the UI under the Tools->Aiming section, and can also be consumed via websockets using the <code>/notify</code> route. 
       parameters:
         - in: cookie
           name: api_token
@@ -711,6 +724,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
     delete:
+      summary: Stop the aiming session
       description: Stop the current aiming mode session.
       parameters:
         - in: cookie
@@ -753,8 +767,108 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericFailureReponse'
+  /notify:
+    servers:
+      - url: ws://{deviceMgmtIp}/ws.lua/apiv1
+        variables:
+          deviceMgmtIp:
+            default: 192.168.2.1
+            description: Device's management IP address
+    get:
+      summary: Subscribe to device events over a WebSocket
+      description: >-
+        Open a WebSocket connection to subscribe to asynchronous device events. Note that this
+        endpoint is <b>not</b> served from the <code>/cgi.lua/apiv1</code> base path used by the rest
+        of this API - the full URL is <code>ws://&lt;deviceMgmtIp&gt;/ws.lua/apiv1/notify</code>
+        (use <code>wss://</code> when the device is accessed over HTTPS).<br><br>
+        The connection is authenticated with the same <code>api_token</code> cookie as the other
+        routes, sent with the opening HTTP handshake request. Requests without a valid token are
+        rejected before the connection is upgraded.<br><br>
+        Once the connection is established the device pushes one JSON text frame per event as it
+        happens. The client does not need to send anything; any frames it does send are ignored.
+        Each frame is a JSON object with an <code>event</code> name and a <code>data</code>
+        payload whose contents depend on the event. Frames are at most 65535 bytes.<br><br>
+        Only the <code>aiming</code> event is currently published. Additional events may be added in
+        later firmware releases, so clients should ignore frames carrying an unrecognised
+        <code>event</code> name rather than treating them as an error.<br><br>
+        The device closes the connection when the internal event feed stops, and the client may
+        close it at any time. Aiming events are only emitted while an aiming session is running -
+        see <code>POST /aiming</code> to start one.
+      parameters:
+        - in: cookie
+          name: api_token
+          schema:
+            type: string
+          description: API auth token.
+          required: true
+        - in: header
+          name: Connection
+          schema:
+            type: string
+            example: Upgrade
+          description: Standard WebSocket handshake header. Must be <code>Upgrade</code>.
+          required: true
+        - in: header
+          name: Upgrade
+          schema:
+            type: string
+            example: websocket
+          description: Standard WebSocket handshake header. Must be <code>websocket</code>.
+          required: true
+        - in: header
+          name: Sec-WebSocket-Key
+          schema:
+            type: string
+            example: dGhlIHNhbXBsZSBub25jZQ==
+          description: Standard WebSocket handshake header. Base64 encoded random 16 byte nonce.
+          required: true
+        - in: header
+          name: Sec-WebSocket-Version
+          schema:
+            type: integer
+            example: 13
+          description: Standard WebSocket handshake header. Must be <code>13</code>.
+          required: true
+      responses:
+        101:
+          description: >-
+            The connection was upgraded to a WebSocket. The schema below describes the JSON text
+            frames the device sends on the open connection, not the body of this response.
+          headers:
+            Upgrade:
+              schema:
+                type: string
+                example: websocket
+            Connection:
+              schema:
+                type: string
+                example: Upgrade
+            Sec-WebSocket-Accept:
+              schema:
+                type: string
+                example: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotifyEvent'
+              examples:
+                aiming-sample:
+                  summary: aiming - signal sample
+                  value:
+                    {"event":"aiming","data":{"rssi":-55,"target":-49}}
+                aiming-done:
+                  summary: aiming - session finished
+                  value:
+                    {"event":"aiming","data":{"done":true}}
+        401:
+          description: Unauthorized response. The connection is not upgraded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericFailureReponse'
   /bridge_table:
     get:
+      summary: Get the bridge table
       description: Get the output of the bridge table.
       parameters:
         - in: cookie
@@ -808,15 +922,16 @@ paths:
                   summary: GET /bridge_table - unauthorized
                   value:
                     {
-                    "statusCode": 401,
-                    "description": "Unauthorized",
-                    "error": {
-                      "details": "Authorization Failed",
-                      "path": "/cgi.lua/apiv1/bridge_table"
+                      "statusCode": 401,
+                      "description": "Unauthorized",
+                      "error": {
+                        "details": "Authorization Failed",
+                        "path": "/cgi.lua/apiv1/bridge_table"
+                      }
                     }
-                  }
   /config:
     get:
+      summary: Get the device configuration
       description: Get the device's current configuration.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.  Optionally pass target=test to get the current test run status.
       parameters:
         - in: cookie
@@ -864,13 +979,13 @@ paths:
                   summary: GET /config - unauthorized
                   value:
                     {
-                    "statusCode": 401,
-                    "description": "Unauthorized",
-                    "error": {
-                      "details": "Authorization Failed",
-                      "path": "/cgi.lua/apiv1/config"
+                      "statusCode": 401,
+                      "description": "Unauthorized",
+                      "error": {
+                        "details": "Authorization Failed",
+                        "path": "/cgi.lua/apiv1/config"
+                      }
                     }
-                  }
         500:
           description: JSON object containing error information in the event that a system or fatal error occurs while fetching the config.
           content:
@@ -882,14 +997,15 @@ paths:
                   summary: GET /config - internal server error
                   value:
                     {
-                    "statusCode": 500,
-                    "description": "Internal Server Error",
-                    "error": {
-                      "details": "System error - internal conversion failed: (internal error detail here)",
-                      "path": "/cgi.lua/apiv1/config"
+                      "statusCode": 500,
+                      "description": "Internal Server Error",
+                      "error": {
+                        "details": "System error - internal conversion failed: (internal error detail here)",
+                        "path": "/cgi.lua/apiv1/config"
+                      }
                     }
-                  }
     post:
+      summary: Update, test, or dry run the configuration
       description: Update the device's configuration and restart networking services, or perform a test or dry run.  Go to the <a href="keys.html" target="_new">Config Key Specs</a> page to view the list of available configuration keys and values.
       parameters:
         - in: cookie
@@ -1101,6 +1217,42 @@ components:
       in: cookie
       name: api_token
   schemas:
+    NotifyEvent:
+      type: object
+      description: A single event frame pushed over the <code>/notify</code> WebSocket.
+      properties:
+        event:
+          type: string
+          description: Name of the event this frame carries.
+          enum: [aiming]
+          example: aiming
+        data:
+          description: Event payload. Contents depend on the <code>event</code> name.
+          oneOf:
+            - $ref: '#/components/schemas/AimingEventData'
+    AimingEventData:
+      type: object
+      description: >-
+        Payload of an <code>aiming</code> event. While an aiming session is running the device
+        emits one sample per second carrying <code>rssi</code> and <code>target</code>. A final
+        frame carrying <code>done</code> is emitted when the session ends, either because the
+        requested duration elapsed or because it was stopped with <code>DELETE /aiming</code>.
+      properties:
+        rssi:
+          type: integer
+          description: Measured signal strength of the peer, in dBm.
+          example: -55
+        target:
+          type: integer
+          description: >-
+            Expected signal strength in dBm for the current link, calculated from the local and
+            peer device models, antenna kits, channel, channel width and distance. Aim the antenna
+            until <code>rssi</code> is as close to this value as possible.
+          example: -49
+        done:
+          type: boolean
+          description: Present and set to true on the final frame of an aiming session.
+          example: true
     GenericSuccessReponse:
       type: object
       properties:
